@@ -1,0 +1,24 @@
+{
+  "name": "breathewatch",
+  "version": "1.0.0",
+  "description": "Air quality visualization app for NYC",
+  "homepage": "https://github.com/Johan0214/BreatheWatch#readme",
+  "bugs": {
+    "url": "https://github.com/Johan0214/BreatheWatch/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Johan0214/BreatheWatch.git"
+  },
+  "license": "ISC",
+  "author": "Group 11: Rosa Taveras, Johan Jaramillo, Koen Santos, Rethick Arun, Dhruv Bhardwaj",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "mongodb": "^7.0.0"
+  }
+}
