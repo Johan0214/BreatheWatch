@@ -12,13 +12,19 @@
   },
   "license": "ISC",
   "author": "Group 11: Rosa Taveras, Johan Jaramillo, Koen Santos, Rethick Arun, Dhruv Bhardwaj",
-  "type": "module",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
   },
   "dependencies": {
-    "mongodb": "^7.0.0"
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "express-session": "^1.18.0",
+    "mongodb": "^7.0.0",
+    "xss": "^1.0.15"
   }
 }

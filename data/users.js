@@ -1,7 +1,7 @@
 import {dbConnection} from '../config/mongoConnection.js';
 import {ObjectId} from 'mongodb';
 import bcrypt from 'bcryptjs';
-import validation from '../validation.js';
+import validation from '../util/validation.js'; // Assumes validation.js is in the parent directory
 
 const saltRounds = 10;
 
@@ -23,22 +23,12 @@ const getCollection = async () => {
  * @returns {Promise<{_id: ObjectId, username: string, firstName: string, lastName: string}>} The newly created user.
  */
 export const createUser = async (username, password, firstName, lastName) => {
-  //DB/Server-side Validation
-  username = validation.checkString(username, 'Username');
-  password = validation.checkString(password, 'Password');
+  //validation.checkString handles the string, type, and trim checks.
   firstName = validation.checkString(firstName, 'First Name');
   lastName = validation.checkString(lastName, 'Last Name');
 
-  //Additional username validation (e.g., length, format)
-  if (username.length < 4 || username.includes(' ')) {
-    throw 'Username must be at least 4 characters long and contain no spaces.';
-  }
-  
-  //Additional password validation (e.g., complexity, length)
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]|;:'",.<>/?\\~`]).{8,}$/;
-  if (!passwordRegex.test(password)) {
-    throw 'Password must be at least 8 characters long and contain: one lowercase letter, one uppercase letter, one number, and one special character.';
-  }
+  username = validation.checkUsername(username); 
+  password = validation.checkPassword(password);
 
   const usersCollection = await getCollection();
   
@@ -50,7 +40,7 @@ export const createUser = async (username, password, firstName, lastName) => {
     throw 'A user with that username already exists.';
   }
 
-  //Hash the password
+  // Hash the password
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   const newUser = {
@@ -82,13 +72,10 @@ export const createUser = async (username, password, firstName, lastName) => {
  * @returns {Promise<{_id: ObjectId, username: string, firstName: string, lastName: string}>} The authenticated user.
  */
 export const checkUser = async (username, password) => {
-  //DB/Server-side Validation
   username = validation.checkString(username, 'Username');
   password = validation.checkString(password, 'Password');
 
   const usersCollection = await getCollection();
-  
-  //Find user by username
   const user = await usersCollection.findOne({
     username: { $regex: new RegExp(`^${username}$`, 'i') } 
   });
@@ -97,14 +84,11 @@ export const checkUser = async (username, password) => {
     throw 'Invalid username or password.';
   }
 
-  //Compare the provided password with the stored hash
   const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
-
   if (!passwordMatch) {
     throw 'Invalid username or password.';
   }
 
-  //Return user without the hash
   const {hashedPassword, ...userWithoutHash} = user;
   return userWithoutHash;
 };
@@ -115,12 +99,18 @@ export const checkUser = async (username, password) => {
  * @returns {Promise<object>} The user object without the password hash.
  */
 export const getUserById = async (id) => {
-    //Basic ID validation
-    if (!id || typeof id !== 'string' || id.trim().length === 0) {
-        throw 'User ID must be a non-empty string.';
+    id = validation.checkString(id, 'User ID');
+    if (!ObjectId.isValid(id)) throw 'Invalid ObjectId.';
+    
+    const usersCollection = await getCollection();
+    const user = await usersCollection.findOne({_id: new ObjectId(id)}, {projection: {hashedPassword: 0}});
+    
+    if (!user) {
+        throw 'User not found.';
     }
-};    
 
+    return user;
+}; 	
 
 /**
  * Updates a user's profile description.
@@ -128,14 +118,17 @@ export const getUserById = async (id) => {
  * @param {string} description 
  * @returns {Promise<object>} The updated user object without the password hash.
  */
-export const updateProfileDescription = async (id, description) => { // <-- THIS IS THE NEW FUNCTION
-    //DB-Level Validation for ID
-    if (!id || typeof id !== 'string' || id.trim().length === 0) throw 'User ID must be a non-empty string.';
+export const updateProfileDescription = async (id, description) => {
+    id = validation.checkString(id, 'User ID');
     if (!ObjectId.isValid(id)) throw 'Invalid ObjectId.';
-
-    //DB-Level Validation for Description
-    if (typeof description !== 'string') throw 'Profile description must be a string.';
-    description = description.trim(); 
+    
+    if (typeof description === 'undefined' || description === null) {
+        throw 'Profile description must be supplied.';
+    }
+    
+    let validatedDescription = validation.checkString(String(description), 'Profile Description'); 
+    description = validatedDescription;
+    
     if (description.length > 500) throw 'User description must be 500 characters or less.';
 
     const usersCollection = await getCollection();

@@ -1,5 +1,4 @@
 //Client-side Input Validation
-
 document.addEventListener('DOMContentLoaded', () => {
     
     const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]|;:'",.<>/?\\~`]).{8,}$/;

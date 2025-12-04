@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {userData} from '../data/index.js'; 
-import validation from '../validation.js';
+import validation from '../util/validation.js';
 import xss from 'xss';
 
 const router = Router();
@@ -51,8 +51,8 @@ router.route('/login')
         
         //Route-Level Validation
         try {
-            username = validation.checkString(username, 'Username');
-            password = validation.checkString(password, 'Password');
+            username = validation.checkUsername(username, 'Username');
+            password = validation.checkPassword(password, 'Password');
         } catch (e) {
             return res.status(400).render('login', {title: "Login", error: e, formData: {username}});
         }
@@ -98,20 +98,11 @@ router.route('/signup')
 
         //Route-Level Validation
         try {
-            username = validation.checkString(username, 'Username');
-            password = validation.checkString(password, 'Password');
+            username = validation.checkUsername(username, 'Username');
+            password = validation.checkPassword(password, 'Password');
             firstName = validation.checkString(firstName, 'First Name');
             lastName = validation.checkString(lastName, 'Last Name');
             
-            //Re-validate complexity checks here too
-            if (username.length < 4 || username.includes(' ')) {
-                throw 'Username must be at least 4 characters long and contain no spaces.';
-            }
-            //Password validation moved to createUser for centralized logic, but basic check remains
-            if (password.length < 8) { 
-                 throw 'Password must be at least 8 characters long.';
-            }
-
         } catch (e) {
             return res.status(400).render('signup', {title: "Sign Up", error: e, formData: {username, firstName, lastName}});
         }
@@ -126,7 +117,7 @@ router.route('/signup')
                 username: user.username,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                profileDescription: user.profileDescription // Include description
+                profileDescription: user.profileDescription //Include description
             };
             return res.redirect('/home');
         } catch (e) {
