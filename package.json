@@ -19,6 +19,9 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "express": "^5.2.1",
+    "express-handlebars": "^8.0.3",
+    "express-session": "^1.18.2",
     "mongodb": "^7.0.0"
   }
 }
