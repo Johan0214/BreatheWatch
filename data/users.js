@@ -1,18 +1,12 @@
 import {dbConnection} from '../config/mongoConnection.js';
+import mongoCollections from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import bcrypt from 'bcryptjs';
 import validation from '../util/validation.js'; // Assumes validation.js is in the parent directory
+import xss from 'xss';
 
+const users = mongoCollections.users;
 const saltRounds = 10;
-
-/**
- * Gets the users collection.
- * @returns {Promise<Collection>} The MongoDB 'users' collection.
- */
-const getCollection = async () => {
-  const db = await dbConnection.dbConnection();
-  return db.collection('users');
-};
 
 /**
  * Creates a new user with validation on the server/DB side.
@@ -26,13 +20,17 @@ export const createUser = async (username, password, firstName, lastName) => {
   //validation.checkString handles the string, type, and trim checks.
   firstName = validation.checkString(firstName, 'First Name');
   lastName = validation.checkString(lastName, 'Last Name');
-
   username = validation.checkUsername(username); 
   password = validation.checkPassword(password);
 
-  const usersCollection = await getCollection();
+  const sanitizedFirstName = xss(firstName);
+  const sanitizedLastName = xss(lastName);
+  const sanitizedUsername = xss(username.toLowerCase()); 
+  const sanitizedPassword = xss(password);
+
+  const usersCollection = await users();
   
-  //Check for existing user (case-insensitive for a simple check)
+  //Check for existing user (case-insensitive)
   const existingUser = await usersCollection.findOne({ 
     username: { $regex: new RegExp(`^${username}$`, 'i') } 
   });
@@ -48,7 +46,8 @@ export const createUser = async (username, password, firstName, lastName) => {
     hashedPassword: hashedPassword,
     firstName: firstName,
     lastName: lastName,
-    profileDescription: '' 
+    profileDescription: '',
+    dateJoined: new Date()
   };
 
   const insertInfo = await usersCollection.insertOne(newUser);
@@ -75,7 +74,10 @@ export const checkUser = async (username, password) => {
   username = validation.checkString(username, 'Username');
   password = validation.checkString(password, 'Password');
 
-  const usersCollection = await getCollection();
+  const sanitizedUsername = xss(username.toLowerCase());
+  const sanitizedPassword = xss(password);
+
+  const usersCollection = await users();
   const user = await usersCollection.findOne({
     username: { $regex: new RegExp(`^${username}$`, 'i') } 
   });
@@ -89,8 +91,8 @@ export const checkUser = async (username, password) => {
     throw 'Invalid username or password.';
   }
 
-  const {hashedPassword, ...userWithoutHash} = user;
-  return userWithoutHash;
+  const {_id, username: uName, firstName, lastName} = user;
+  return {_id, username: uName, firstName, lastName};
 };
 
 /**
@@ -102,7 +104,7 @@ export const getUserById = async (id) => {
     id = validation.checkString(id, 'User ID');
     if (!ObjectId.isValid(id)) throw 'Invalid ObjectId.';
     
-    const usersCollection = await getCollection();
+    const usersCollection = await users();
     const user = await usersCollection.findOne({_id: new ObjectId(id)}, {projection: {hashedPassword: 0}});
     
     if (!user) {
@@ -131,7 +133,7 @@ export const updateProfileDescription = async (id, description) => {
     
     if (description.length > 500) throw 'User description must be 500 characters or less.';
 
-    const usersCollection = await getCollection();
+    const usersCollection = await users();
     const updateInfo = await usersCollection.updateOne(
         { _id: new ObjectId(id) },
         { $set: { profileDescription: description } }

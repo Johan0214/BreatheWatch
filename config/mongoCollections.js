@@ -16,8 +16,10 @@ const getCollectionFn = (collection) => {
 };
 
 /* Now, you can list your collections here: */
-export const users = getCollectionFn('Users');
-export const airQualityData = getCollectionFn('AirQualityData');
-export const reports = getCollectionFn('Reports');
-export const pollutionSources = getCollectionFn('PollutionSources');
-export const recommendations = getCollectionFn('Recommendations');
+export default {
+  users: getCollectionFn('users'), 
+  airQualityData: getCollectionFn('airQualityData'),
+  reports: getCollectionFn('Reports'),
+  pollutionSources: getCollectionFn('PollutionSources'),
+  recommendations: getCollectionFn('Recommendations')
+};
