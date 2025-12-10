@@ -52,54 +52,51 @@ app.use((req, res, next) => {
     next();
 });
 
-// TEMPORARY: Mock login for testing
+// TEMPORARY: Mock login for testing with multiple users
 app.get('/test-login', async (req, res) => {
     try {
         const usersCollection = await users();
-        const user = await usersCollection.findOne({});
-        
+        const userParam = req.query.user || 'test'; // default to test user
+
+        let user;
+        switch (userParam.toLowerCase()) {
+            case 'alice':
+                user = await usersCollection.findOne({ email: 'alice@example.com' });
+                break;
+            case 'bob':
+                user = await usersCollection.findOne({ email: 'bob@example.com' });
+                break;
+            case 'test':
+            default:
+                user = await usersCollection.findOne({ email: 'test@test.com' });
+                break;
+        }
+
         if (!user) {
             return res.status(500).send(`
-                <h1>No users found in database!</h1>
-                <p>Please create a user first. Run this in MongoDB shell:</p>
-                <pre>
-db.Users.insertOne({
-    _id: new ObjectId(),
-    firstName: "Test",
-    lastName: "User",
-    email: "test@test.com",
-    city: "Brooklyn",
-    state: "NY",
-    age: 30,
-    hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
-    userType: "Renter",
-    profileDescription: "Test user for reports",
-    savedLocations: [],
-    submittedReports: []
-})
-                </pre>
+                <h1>User not found!</h1>
+                <p>Please make sure the user exists in the database.</p>
                 <a href="/">Go Home</a>
             `);
         }
 
         // Set session with real user data
         req.session.user = {
-            userId: user._id.toString(),  // Convert ObjectId to string
+            userId: user._id.toString(),
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             userType: user.userType
         };
-        
-        console.log('✓ Test login successful for user:', user.email);
-        console.log('✓ User ID:', user._id.toString());
-        
+
+        console.log(`✓ Test login successful for user: ${user.email}`);
         res.redirect('/reports');
     } catch (error) {
         console.error('Test login error:', error);
         res.status(500).send('Error during test login: ' + error.message);
     }
 });
+
 
 // Authentication middleware
 const isAuthenticated = (req, res, next) => {
