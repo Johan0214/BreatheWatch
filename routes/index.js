@@ -1,8 +1,13 @@
-import reportsRoutes from './reports.js';
+import authRoutes from './auth.js';
+import homeRoutes from './home.js';
+import reportRoutes from './reports.js';
 
-const constructorMethod = (app) => {
-  // Main routes
-  app.use('/reports', reportsRoutes);
+export const configRoutes = (app) => {
+  // Homepage and login/signup
+  app.use('/', authRoutes);
+
+  // Protected home/dashboard page
+  app.use('/home', homeRoutes);
+
+  app.use('/reports', reportRoutes);
 };
-
-export default constructorMethod;
