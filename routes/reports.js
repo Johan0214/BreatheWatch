@@ -31,9 +31,18 @@ router.get('/', async (req, res) => {
 // GET /reports/my - View user's reports
 router.get('/my', async (req, res) => {
     try {
+        console.log('=== DEBUG /reports/my ===');
+        console.log('Session user:', req.session.user);
+        console.log('User ID from session:', req.session.user.userId);
+        console.log('User ID type:', typeof req.session.user.userId);
+        console.log('========================');
+        
         const reportsList = await reportsData.getReportsByUser(
             req.session.user.userId
         );
+        
+        console.log('Reports found:', reportsList.length);
+        console.log('========================');
 
         res.render('reports/myReports', {
             title: 'My Reports - BreatheWatch',

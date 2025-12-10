@@ -1,6 +1,5 @@
 // public/js/reports.js
-// Client-side JavaScript for Reports - KOEN'S FEATURES
-// This handles AJAX submissions and dynamic updates for reports
+// Client-side JavaScript for Reports - FIXED VERSION (No Duplicates)
 
 // XSS Protection - Sanitize user input on client side
 function sanitizeHTML(str) {
@@ -43,6 +42,9 @@ function hideSuccess(elementId) {
     }
 }
 
+// Track if form is currently submitting to prevent duplicates
+let isSubmitting = false;
+
 // Initialize report form handlers when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Create report form handler
@@ -51,6 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reportForm) {
         reportForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Prevent duplicate submissions
+            if (isSubmitting) {
+                console.log('Form already submitting, ignoring duplicate submission');
+                return;
+            }
+            
             hideError('reportError');
 
             const formData = {
@@ -87,6 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Mark as submitting and disable button
+            isSubmitting = true;
+            const submitButton = reportForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
             try {
                 const response = await fetch('/reports/create', {
                     method: 'POST',
@@ -103,9 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = '/reports/my';
                 } else {
                     showError('reportError', data.error || 'Failed to submit report');
+                    // Re-enable form
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
                 }
             } catch (error) {
                 showError('reportError', 'An error occurred while submitting the report');
+                // Re-enable form
+                isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
             }
         });
     }

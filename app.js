@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path';
 import { ObjectId } from 'mongodb';
-import { Users } from './config/mongoCollections.js';
+import { users } from './config/mongoCollections.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,9 +21,11 @@ app.engine('handlebars', exphbs.engine({
         gt: (a, b) => a > b,
         lt: (a, b) => a < b,
         add: (a, b) => a + b,
-        subtract: (a, b) => a - b
+        subtract: (a, b) => a - b,
+        toString: (value) => value ? value.toString() : ''
     }
 }));
+
 app.set('view engine', 'handlebars');
 
 // Middleware
@@ -53,7 +55,7 @@ app.use((req, res, next) => {
 // TEMPORARY: Mock login for testing
 app.get('/test-login', async (req, res) => {
     try {
-        const usersCollection = await Users();
+        const usersCollection = await users();
         const user = await usersCollection.findOne({});
         
         if (!user) {

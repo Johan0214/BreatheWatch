@@ -1,71 +1,62 @@
 <div class="card">
-    <h1>Air Quality Reports</h1>
-    <p>Community-submitted air quality observations across NYC.</p>
+    <h1>My Reports</h1>
+    <p>View and manage your submitted air quality reports.</p>
 
     <div style="margin-bottom: 2rem;">
         <a href="/reports/create" class="btn">Submit New Report</a>
-        <a href="/reports/my" class="btn btn-secondary" style="margin-left: 1rem;">My Reports</a>
+        <a href="/reports" class="btn btn-secondary" style="margin-left: 1rem;">View All Reports</a>
     </div>
 
     {{#if reports.length}}
-        <div class="reports-grid">
-            {{#each reports}}
-            <div class="result-card">
-                <h3>{{this.neighborhood}}, {{this.borough}}</h3>
-                
-                <p><strong>Type:</strong> {{this.reportType}}</p>
-                
-                <p><strong>Severity:</strong> 
-                    <span class="score {{#if (eq this.severity "High")}}high-risk{{else}}{{#if (eq this.severity "Medium")}}moderate{{else}}safe{{/if}}{{/if}}">
-                        {{this.severity}}
-                    </span>
-                </p>
-                
-                <p><strong>Status:</strong> 
-                    <span class="score {{#if (eq this.status "Resolved")}}safe{{else}}{{#if (eq this.status "Reviewed")}}moderate{{else}}high-risk{{/if}}{{/if}}">
-                        {{this.status}}
-                    </span>
-                </p>
-                
-                <p><strong>Description:</strong> {{this.description}}</p>
-                
-                <p style="font-size: 0.9rem; color: #718096;">
-                    <strong>Reported:</strong> {{this.createdAt}}
-                </p>
-                
-                <a href="/reports/{{this._id}}" class="btn">View Details</a>
-            </div>
-            {{/each}}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each reports}}
+                    <tr>
+                        <td>{{this.neighborhood}}, {{this.borough}}</td>
+                        <td>{{this.reportType}}</td>
+                        <td>
+                            <span class="score {{#if (eq this.severity "High")}}high-risk{{else}}{{#if (eq this.severity "Medium")}}moderate{{else}}safe{{/if}}{{/if}}">
+                                {{this.severity}}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="score {{#if (eq this.status "Resolved")}}safe{{else}}{{#if (eq this.status "Reviewed")}}moderate{{else}}high-risk{{/if}}{{/if}}">
+                                {{this.status}}
+                            </span>
+                        </td>
+                        <td>{{this.createdAt}}</td>
+                        <td>
+                            <a href="/reports/{{toString this._id}}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
         </div>
 
-        <!-- Pagination -->
-        {{#if (gt totalPages 1)}}
-        <div style="margin-top: 2rem; text-align: center;">
-            {{#if (gt currentPage 1)}}
-                <a href="/reports?page={{subtract currentPage 1}}" class="btn btn-secondary">← Previous</a>
-            {{/if}}
-            
-            <span style="margin: 0 1rem; font-weight: 600;">Page {{currentPage}} of {{totalPages}}</span>
-            
-            {{#if (lt currentPage totalPages)}}
-                <a href="/reports?page={{add currentPage 1}}" class="btn btn-secondary">Next →</a>
-            {{/if}}
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #edf2f7; border-radius: 8px;">
+            <h3 style="margin-bottom: 0.5rem;">Report Statistics</h3>
+            <p><strong>Total Reports:</strong> {{reports.length}}</p>
         </div>
-        {{/if}}
     {{else}}
         <div style="text-align: center; padding: 3rem; background: #f7fafc; border-radius: 8px;">
-            <p style="font-size: 1.2rem; margin-bottom: 1rem;">No reports have been submitted yet.</p>
-            <p style="margin-bottom: 2rem; color: #718096;">Be the first to report an air quality issue in your neighborhood!</p>
-            <a href="/reports/create" class="btn">Submit First Report</a>
+            <svg style="width: 80px; height: 80px; margin: 0 auto 1rem; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">You haven't submitted any reports yet.</p>
+            <p style="margin-bottom: 2rem; color: #718096;">Help your community by reporting air quality issues you observe in your neighborhood.</p>
+            <a href="/reports/create" class="btn">Submit Your First Report</a>
         </div>
     {{/if}}
 </div>
-
-<style>
-.reports-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-</style>
