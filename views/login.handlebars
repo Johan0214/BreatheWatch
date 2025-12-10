@@ -1,13 +1,10 @@
 <div class="auth-form">
     <h2>Log In to BreatheWatch</h2>
 
-    {{#if hasErrors}}
-        <!-- This block displays server-side validation or authentication errors -->
+    {{#if error}}
         <div class="error-message">
             <ul>
-                {{#each errors}}
-                    <li>{{this}}</li>
-                {{/each}}
+                <li>{{error}}</li>
             </ul>
         </div>
     {{/if}}
@@ -16,15 +13,15 @@
         
         <div class="form-group">
             <label for="username">Username</label>
-            <!-- value="{{user.username}}" keeps the input if the form fails validation -->
             <input 
                 type="text" 
                 id="username" 
                 name="username" 
-                value="{{user.username}}" 
+                value="{{formData.username}}" 
                 required 
                 aria-label="Username"
             >
+            <span id="username-error" class="error-message" style="display:none;"></span>
         </div>
 
         <div class="form-group">
@@ -36,6 +33,7 @@
                 required 
                 aria-label="Password"
             >
+            <span id="password-error" class="error-message" style="display:none;"></span>
         </div>
 
         <button type="submit" class="button primary" style="width: 100%; margin-top: 1rem;">Login</button>
