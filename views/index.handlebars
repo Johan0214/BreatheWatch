@@ -14,9 +14,13 @@
 {{!-- Conditional rendering based on whether the user is logged in --}}
 {{#if isLoggedIn}}
 <div class="cta-card secondary">
-    <h3>Welcome back!</h3>
+    <h3>Welcome back, {{user.firstName}}!</h3>
     <p>Head over to your dashboard to view your logged reports and manage your settings.</p>
-    <a href="/dashboard" class="button secondary">Go to Dashboard</a>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <a href="/dashboard" class="button secondary">Go to Dashboard</a>
+        <a href="/reports" class="button primary">View Reports</a>
+        <a href="/logout" class="button tertiary">Logout</a>
+    </div>
 </div>
 {{else}}
 <div class="cta-card secondary">
@@ -27,3 +31,4 @@
         <a href="/login" class="button secondary">Login</a>
     </div>
 </div>
+{{/if}}

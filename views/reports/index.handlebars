@@ -1,0 +1,43 @@
+<div class="reports-container">
+    <h1>Air Quality Reports</h1>
+    <p class="subtitle">View existing reports or submit a new report to help monitor your environment.</p>
+
+    <div class="reports-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+        <a href="/reports/create" class="button primary">Submit New Report</a>
+        <a href="/reports/my" class="button secondary">My Reports</a>
+    </div>
+
+    {{#if reports}}
+    <div class="reports-list" style="margin-top: 3rem;">
+        <h2>All Reports</h2>
+        <table class="reports-table">
+            <thead>
+                <tr>
+                    <th>Report Type</th>
+                    <th>Neighborhood</th>
+                    <th>Borough</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each reports}}
+                <tr>
+                    <td>{{this.reportType}}</td>
+                    <td>{{this.neighborhood}}</td>
+                    <td>{{this.borough}}</td>
+                    <td>{{this.severity}}</td>
+                    <td>{{this.status}}</td>
+                    <td>{{this.createdAt}}</td>
+                    <td><a href="/reports/{{this._id}}" class="button small">View</a></td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+        <p style="text-align: center; margin-top: 2rem;">No reports found.</p>
+    {{/if}}
+</div>

@@ -1,0 +1,69 @@
+<div class="card">
+    <h1>Submit Air Quality Report</h1>
+    <p>Report an air quality issue you've observed in your neighborhood.</p>
+
+    <form id="reportForm" novalidate>
+        <div class="form-group">
+            <label for="neighborhood">Neighborhood <span aria-label="required">*</span></label>
+            <input 
+                type="text" 
+                id="neighborhood" 
+                name="neighborhood" 
+                required 
+                aria-required="true"
+                value="{{neighborhood}}"
+                placeholder="e.g., Harlem, Williamsburg">
+        </div>
+
+        <div class="form-group">
+            <label for="borough">Borough <span aria-label="required">*</span></label>
+            <select id="borough" name="borough" required aria-required="true">
+                <option value="">Select Borough</option>
+                <option value="Manhattan" {{#if (eq borough "Manhattan")}}selected{{/if}}>Manhattan</option>
+                <option value="Brooklyn" {{#if (eq borough "Brooklyn")}}selected{{/if}}>Brooklyn</option>
+                <option value="Queens" {{#if (eq borough "Queens")}}selected{{/if}}>Queens</option>
+                <option value="Bronx" {{#if (eq borough "Bronx")}}selected{{/if}}>Bronx</option>
+                <option value="Staten Island" {{#if (eq borough "Staten Island")}}selected{{/if}}>Staten Island</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="reportType">Type of Issue <span aria-label="required">*</span></label>
+            <select id="reportType" name="reportType" required aria-required="true">
+                <option value="">Select Type</option>
+                <option value="Smoke">Smoke</option>
+                <option value="Odor">Odor</option>
+                <option value="Dust">Dust</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="severity">Severity <span aria-label="required">*</span></label>
+            <select id="severity" name="severity" required aria-required="true">
+                <option value="">Select Severity</option>
+                <option value="Low">Low - Minor issue</option>
+                <option value="Medium">Medium - Noticeable problem</option>
+                <option value="High">High - Severe concern</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description <span aria-label="required">*</span></label>
+            <textarea 
+                id="description" 
+                name="description" 
+                required 
+                aria-required="true"
+                placeholder="Describe what you observed, including time, location details, and any other relevant information... (minimum 10 characters)"></textarea>
+            <small>Minimum 10 characters - Be specific about location and time</small>
+        </div>
+
+        <div id="reportError" class="error"></div>
+
+        <button type="submit" class="btn">Submit Report</button>
+        <a href="/reports/my" class="btn btn-secondary" style="margin-left: 1rem;">View My Reports</a>
+    </form>
+</div>
+
+<script src="/public/js/reports.js"></script>

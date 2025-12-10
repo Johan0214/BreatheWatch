@@ -1,39 +1,97 @@
 import express from 'express';
 import session from 'express-session';
 import exphbs from 'express-handlebars';
-import { configRoutes } from './routes/index.js';
-import {fileURLToPath} from 'url';
-import {dirname} from 'path';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import authRoutes from './routes/auth.js';
 
-//import validation from './util/validation.js';
-
-const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const app = express();
 const PORT = 3000;
 
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main',}));
+/* ===========================
+   HANDLEBARS SETUP
+   =========================== */
+app.engine(
+  'handlebars',
+  exphbs.engine({
+    defaultLayout: 'main',
+    helpers: {
+      eq: (a, b) => a === b,
+      gt: (a, b) => a > b,
+      lt: (a, b) => a < b,
+      add: (a, b) => a + b,
+      subtract: (a, b) => a - b,
+      toString: (value) => (value ? value.toString() : '')
+    }
+  })
+);
 app.set('view engine', 'handlebars');
+app.set('views', join(__dirname, 'views'));
 
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(express.json()); 
-app.use(express.urlencoded({extended: true}));
+/* ===========================
+   MIDDLEWARE
+   =========================== */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/public', express.static(join(__dirname, 'public')));
 
-app.use(session({
-  name: 'AuthenticationState',
-  secret: 'This is a secret!',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    maxAge: 3600000
+/* ===========================
+   SESSION
+   =========================== */
+app.use(
+  session({
+    name: 'BreatheWatchSession',
+    secret: 'ThisIsASecretKey123!',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 3600000,
+      httpOnly: true,
+      secure: false
+    }
+  })
+);
+
+/* ===========================
+   EXPOSE SESSION USER TO VIEWS
+   =========================== */
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
+/* ===========================
+   ROOT REDIRECT
+   =========================== */
+app.get('/', (req, res) => {
+  if (req.session.user) {
+    return res.redirect('/home');
+  } else {
+    return res.redirect('/login');
   }
-}));
+});
 
-configRoutes(app); 
+/* ===========================
+   ROUTES
+   =========================== */
+app.use('/', authRoutes);
+app.use('/home', (await import('./routes/home.js')).default);
+app.use('/reports', (await import('./routes/reports.js')).default);
 
+/* ===========================
+   GLOBAL ERROR HANDLER
+   =========================== */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).render('error', { title: 'Error', message: 'Something went wrong!' });
+});
 
+/* ===========================
+   START SERVER
+   =========================== */
 app.listen(PORT, () => {
-    console.log("We've got a server!");
-    console.log(`Your routes will be running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

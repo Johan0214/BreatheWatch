@@ -1,16 +1,13 @@
 import authRoutes from './auth.js';
-//Add other route files here
+import homeRoutes from './home.js';
+import reportRoutes from './reports.js';
 
 export const configRoutes = (app) => {
+  // Homepage and login/signup
   app.use('/', authRoutes);
-  //Future routes will be added here:
-  //app.use('/map', mapRoutes);
 
-  // 404 Not Found Handler
-  app.use('*', (req, res) => {
-    res.status(404).render('error', { 
-        title: "404 Not Found", 
-        message: "The page you are looking for does not exist." 
-    });
-  });
+  // Protected home/dashboard page
+  app.use('/home', homeRoutes);
+
+  app.use('/reports', reportRoutes);
 };

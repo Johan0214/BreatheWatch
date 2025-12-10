@@ -1,11 +1,10 @@
 <div class="auth-form">
     <h2>Create Your BreatheWatch Account</h2>
-    {{#if hasErrors}}
+
+    {{#if error}}
         <div class="error-message">
             <ul>
-                {{#each errors}}
-                    <li>{{this}}</li>
-                {{/each}}
+                <li>{{error}}</li>
             </ul>
         </div>
     {{/if}}
@@ -13,28 +12,32 @@
     <form id="signup-form" method="POST" action="/signup">
         <div class="form-group">
             <label for="firstName">First Name</label>
-            <!-- value="{{user.firstName}}" keeps the input if the form fails validation -->
-            <input type="text" id="firstName" name="firstName" value="{{user.firstName}}" required>
+            <input type="text" id="firstName" name="firstName" value="{{formData.firstName}}" required>
+            <span id="firstName-error" class="error-message" style="display:none;"></span>
         </div>
 
         <div class="form-group">
             <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" value="{{user.lastName}}" required>
+            <input type="text" id="lastName" name="lastName" value="{{formData.lastName}}" required>
+            <span id="lastName-error" class="error-message" style="display:none;"></span>
         </div>
 
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" value="{{user.username}}" required>
+            <input type="text" id="username" name="username" value="{{formData.username}}" required>
+            <span id="username-error" class="error-message" style="display:none;"></span>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
+            <span id="password-error" class="error-message" style="display:none;"></span>
         </div>
 
         <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
             <input type="password" id="confirmPassword" name="confirmPassword" required>
+            <span id="confirmPassword-error" class="error-message" style="display:none;"></span>
         </div>
 
         <button type="submit" class="button primary" style="width: 100%; margin-top: 1rem;">Sign Up</button>
