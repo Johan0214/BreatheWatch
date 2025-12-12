@@ -49,10 +49,42 @@ export const checkPassword = (password) => {
     return password;
 };
 
+export const checkAge = (age, varName) => {
+    if (age === null || age === undefined || age === '') {
+        throw `${varName} must be provided.`;
+    }   
+    let parsedAge;
+    if (typeof age === 'string') {
+        parsedAge = parseInt(age.trim());
+    } else if (typeof age === 'number') {
+        parsedAge = age;
+    } else {
+        throw `${varName} must be a number or a string representing a number.`;
+    }
+
+    if (isNaN(parsedAge)) {
+        throw `${varName} must be a valid number.`;
+    }
+
+    if (!Number.isInteger(parsedAge)) {
+        throw `${varName} must be a whole number (integer).`;
+    }
+    
+    const MIN_AGE = 18;
+    const MAX_AGE = 120; 
+    
+    if (parsedAge < MIN_AGE || parsedAge > MAX_AGE) {
+        throw `${varName} must be between ${MIN_AGE} and ${MAX_AGE}.`;
+    }
+
+    return parsedAge;
+};
+
 const exportedMethods = {
     checkString,
     checkUsername,
-    checkPassword
+    checkPassword,
+    checkAge
 };
 
 export default exportedMethods;

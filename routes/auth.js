@@ -75,10 +75,15 @@ router.post('/signup', redirectIfAuthenticated, async (req, res) => {
         userId: user._id.toString(),
         username: user.username,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
+        profileDescription: newUser.profileDescription,
+        city: newUser.city,
+        state: newUser.state,
+        age: newUser.age,
+        isProfileConfigured: newUser.isProfileConfigured
     };
 
-    return res.redirect('/home');
+    return res.redirect('/profile/setup');
   } catch (e) {
     return res.status(400).render('signup', {
       title: 'Sign Up',
@@ -105,3 +110,77 @@ router.get('/', (req, res) => {
 });
 
 export default router;
+
+/* ========================
+PROFILE SETUP
+========================== */
+router.route('/profile/setup').get(requireAuth, requireSetupGuard, async (req, res) => {
+    return res.render('profileSetup', {
+        title: 'Complete Profile Setup',
+        user: req.session.user,
+        isLoggedIn: true
+    });
+});
+
+router.route('/profile/setup').post(requireAuth, requireSetupGuard, async (req, res) => {
+    const {city, state, age, profileDescription} = req.body;
+    let errors = [];
+    
+    try {
+        const sanitizedCity = xss(city);
+        const sanitizedState = xss(state);
+        const parsedAge = age; 
+
+        validation.checkString(sanitizedCity, 'City');
+        validation.checkString(sanitizedState, 'State');
+        validation.checkAge(parsedAge, 'Age'); 
+        validation.checkString(profileDescription, 'Profile Description', true); 
+
+    } catch (e) {
+        errors.push(e);
+    }
+    
+    if (errors.length > 0) {
+        return res.status(400).render('profileSetup', {
+            title: 'Complete Profile Setup',
+            errors: errors,
+            hasErrors: true,
+            user: {city, state, age, profileDescription},
+            isLoggedIn: true
+        });
+    }
+
+    try {
+        const updatedUser = await updateUserProfile(
+            req.session.user.userId, 
+            xss(city), 
+            xss(state), 
+            parseInt(age), 
+            xss(profileDescription)
+        );
+        
+        req.session.user = {
+            userId: updatedUser._id.toString(), 
+            firstName: updatedUser.firstName, 
+            lastName: updatedUser.lastName, 
+            username: updatedUser.username, 
+            profileDescription: updatedUser.profileDescription,
+            city: updatedUser.city,
+            state: updatedUser.state,
+            age: updatedUser.age,
+            isProfileConfigured: updatedUser.isProfileConfigured
+        };
+
+        return res.redirect('/home');
+        
+    } catch (e) {
+        errors.push(e.toString());
+        return res.status(500).render('profileSetup', {
+            title: 'Complete Profile Setup',
+            errors: errors,
+            hasErrors: true,
+            user: {city, state, age, profileDescription},
+            isLoggedIn: true
+        });
+    }
+});
