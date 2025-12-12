@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import authRoutes from './routes/auth.js';
 import airQualityRoutes from './routes/airQuality.js';
+import pollutionRoutes from './routes/pollutionSources.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -82,6 +83,7 @@ app.use('/', authRoutes);
 app.use('/home', (await import('./routes/home.js')).default);
 app.use('/reports', (await import('./routes/reports.js')).default);
 app.use('/airQuality', airQualityRoutes);
+app.use('/pollution-sources', pollutionRoutes);
 
 /* ===========================
    GLOBAL ERROR HANDLER

@@ -1,0 +1,155 @@
+<div class="card">
+    <h1>Pollution Sources Across NYC</h1>
+    <p>Discover where pollution comes from in different neighborhoods - traffic, factories, construction, and more.</p>
+
+    <!-- Filters -->
+    <div style="background: #edf2f7; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+        <h3 style="margin-bottom: 1rem;">Filter Sources</h3>
+        <form method="GET" action="/pollution-sources" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="form-group">
+                <label for="sourceType">Source Type</label>
+                <select id="sourceType" name="sourceType">
+                    <option value="">All Types</option>
+                    <option value="Traffic" {{#if (eq filters.sourceType "Traffic")}}selected{{/if}}>Traffic</option>
+                    <option value="Industrial" {{#if (eq filters.sourceType "Industrial")}}selected{{/if}}>Industrial</option>
+                    <option value="Construction" {{#if (eq filters.sourceType "Construction")}}selected{{/if}}>Construction</option>
+                    <option value="Residential" {{#if (eq filters.sourceType "Residential")}}selected{{/if}}>Residential</option>
+                    <option value="Other" {{#if (eq filters.sourceType "Other")}}selected{{/if}}>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="borough">Borough</label>
+                <select id="borough" name="borough">
+                    <option value="">All Boroughs</option>
+                    <option value="Manhattan" {{#if (eq filters.borough "Manhattan")}}selected{{/if}}>Manhattan</option>
+                    <option value="Brooklyn" {{#if (eq filters.borough "Brooklyn")}}selected{{/if}}>Brooklyn</option>
+                    <option value="Queens" {{#if (eq filters.borough "Queens")}}selected{{/if}}>Queens</option>
+                    <option value="Bronx" {{#if (eq filters.borough "Bronx")}}selected{{/if}}>Bronx</option>
+                    <option value="Staten Island" {{#if (eq filters.borough "Staten Island")}}selected{{/if}}>Staten Island</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="minContribution">Min Contribution %</label>
+                <input type="number" id="minContribution" name="minContribution" min="0" max="100" placeholder="0" value="{{filters.minContribution}}">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+
+    {{#if sources.length}}
+        <div style="margin-bottom: 1rem;">
+            <p><strong>Found {{sources.length}} pollution sources</strong></p>
+        </div>
+
+        <div class="sources-grid">
+            {{#each sources}}
+            <div class="source-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">{{this.neighborhood}}, {{this.borough}}</h3>
+                    <span class="source-badge {{this.sourceType}}">{{this.sourceType}}</span>
+                </div>
+                
+                <div class="contribution-bar-container">
+                    <div class="contribution-bar" style="width: {{this.estimatedContribution}}%;">
+                        <span class="contribution-text">{{this.estimatedContribution}}%</span>
+                    </div>
+                </div>
+                
+                <p style="margin: 1rem 0; color: #4a5568;">{{this.description}}</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                    <span style="font-size: 0.9rem; color: #718096;">Data Year: {{this.dataYear}}</span>
+                    <a href="/pollution-sources/{{toString this._id}}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Details</a>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    {{else}}
+        <div style="text-align: center; padding: 3rem; background: #f7fafc; border-radius: 8px;">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">No pollution sources found.</p>
+            <p style="color: #718096;">Try adjusting your filters or search for a specific neighborhood.</p>
+        </div>
+    {{/if}}
+</div>
+
+<style>
+.sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.source-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.source-card:hover {
+    transform: translateY(-5px);
+}
+
+.source-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.source-badge.Traffic {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.source-badge.Industrial {
+    background: #feebc8;
+    color: #7c2d12;
+}
+
+.source-badge.Construction {
+    background: #fefcbf;
+    color: #744210;
+}
+
+.source-badge.Residential {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.source-badge.Other {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+.contribution-bar-container {
+    background: #e2e8f0;
+    border-radius: 8px;
+    height: 30px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.contribution-bar {
+    background: linear-gradient(90deg, #48bb78, #38a169);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+    transition: width 0.5s ease;
+}
+
+.contribution-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+</style>
