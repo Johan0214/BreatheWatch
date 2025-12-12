@@ -39,5 +39,17 @@ export const getNeighborhoodScore = async (neighborhood) => {
         score: score
     };
 };
+export const getHistoricalData = async (neighborhood) => {
+    neighborhood = validation.validateLocation(neighborhood, "Neighborhood");
 
+    const collection = await airCollectionFn();
+
+    const records = await collection
+        .find({ neighborhood })
+        .project({ pollutant: 1, value: 1, date: 1, timePeriod: 1 })
+        .sort({ date: 1 })
+        .toArray();
+
+    return records;
+};
 export default { getNeighborhoodScore };
