@@ -1,7 +1,8 @@
-// tasks/seed.js
+// tasks/seed.js 
 // SEED SCRIPT FOR MULTIPLE USERS AND REPORTS
 
 import { MongoClient, ObjectId } from 'mongodb';
+import axios from 'axios';
 
 const mongoConfig = {
     serverUrl: 'mongodb://localhost:27017/',
@@ -42,7 +43,7 @@ const seedDatabase = async () => {
                 city: "Brooklyn",
                 state: "NY",
                 age: 30,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Test user for reports",
                 savedLocations: [],
@@ -56,7 +57,7 @@ const seedDatabase = async () => {
                 city: "Brooklyn",
                 state: "NY",
                 age: 28,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Alice test user",
                 savedLocations: [],
@@ -70,7 +71,7 @@ const seedDatabase = async () => {
                 city: "Queens",
                 state: "NY",
                 age: 35,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Bob test user",
                 savedLocations: [],
@@ -160,41 +161,27 @@ const seedDatabase = async () => {
         }
 
         const airQualityCollection = db.collection('AirQualityData');
+        await airQualityCollection.deleteMany({});
 
-        // Clearing old air quality data
-        const deleteAir = await airQualityCollection.deleteMany({});
-        console.log(`✓ Cleared ${deleteAir.deletedCount} existing AirQualityData records`);
+        const apiRes = await axios.get('https://data.cityofnewyork.us/resource/c3uy-2p5r.json?$limit=5000');
 
-        // Manual dataset (pulled from NYC Open Data)
-        const airQualityDocs = [
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "West Queens", borough: "Queens", value: 6.89, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "West Queens", borough: "Queens", value: 21.33, timePeriod: "Summer 2023", date: "06/01/2023" },
+        const rows = Array.isArray(apiRes.data) ? apiRes.data : [];
 
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Port Richmond", borough: "Staten Island", value: 7.18, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Port Richmond", borough: "Staten Island", value: 13.11, timePeriod: "Summer 2023", date: "06/01/2023" },
+        const airDocs = rows
+            .filter(r => r.name && r.geo_place_name && r.data_value)
+            .map(r => ({
+                pollutant: r.name,
+                neighborhood: r.geo_place_name,
+                value: Number(r.data_value),
+                timePeriod: r.time_period,
+                date: r.start_date
+            }))
+            .filter(r => !isNaN(r.value));
 
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "East Flatbush", borough: "Brooklyn", value: 7.69, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "East Flatbush", borough: "Brooklyn", value: 19.93, timePeriod: "Summer 2023", date: "06/01/2023" },
-
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Rockaways", borough: "Queens", value: 5.10, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Rockaways", borough: "Queens", value: 16.02, timePeriod: "Summer 2023", date: "06/01/2023" },
-
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Greenpoint", borough: "Brooklyn", value: 9.02, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Greenpoint", borough: "Brooklyn", value: 24.75, timePeriod: "Summer 2023", date: "06/01/2023" },
-
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Upper East Side–Gramercy", borough: "Manhattan", value: 6.90, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Upper East Side–Gramercy", borough: "Manhattan", value: 30.11, timePeriod: "Summer 2023", date: "06/01/2023" },
-
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Hunts Point–Mott Haven", borough: "Bronx", value: 7.33, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Hunts Point–Mott Haven", borough: "Bronx", value: 28.17, timePeriod: "Summer 2023", date: "06/01/2023" },
-
-            { pollutant: "Fine particles (PM 2.5)", neighborhood: "Chelsea", borough: "Manhattan", value: 7.12, timePeriod: "Summer 2023", date: "06/01/2023" },
-            { pollutant: "Nitrogen dioxide (NO2)", neighborhood: "Chelsea", borough: "Manhattan", value: 25.93, timePeriod: "Summer 2023", date: "06/01/2023" }
-        ];
-
-        const airInsert = await airQualityCollection.insertMany(airQualityDocs);
-        console.log(`Inserted ${airInsert.insertedCount} AirQualityData records`);
-
+        if (airDocs.length > 0) {
+            await airQualityCollection.insertMany(airDocs);
+            console.log(`Inserted ${airDocs.length} air quality records`);
+        }
 
         console.log('========================================');
         console.log('✅ SEED COMPLETED SUCCESSFULLY!');
