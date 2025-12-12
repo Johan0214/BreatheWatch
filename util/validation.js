@@ -49,10 +49,20 @@ export const checkPassword = (password) => {
     return password;
 };
 
+export const checkNumber = (val, varName) => {
+  if (val === null || val === undefined) throw `${varName} is required.`;
+  if (typeof val !== 'number' || Number.isNaN(val)) {
+    throw `${varName} must be a valid number.`;
+  }
+  if (val < 0) throw `${varName} cannot be negative.`;
+  return val;
+};
+
 const exportedMethods = {
     checkString,
     checkUsername,
-    checkPassword
+    checkPassword,
+    checkNumber
 };
 
 export default exportedMethods;

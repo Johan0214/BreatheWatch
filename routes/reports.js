@@ -5,6 +5,9 @@
 
 import { Router } from 'express';
 import * as reportsData from '../data/reports.js';
+import { readFile } from "fs/promises";
+import path from "path";
+import airQualityData from "../data/AirQualityData.js"
 
 const router = Router();
 
@@ -94,6 +97,76 @@ router.post('/create', protectRoute, async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+router.get("/pollution-map", (req, res) => {
+  try {
+    res.render("reports/map", {
+      title: "Air Quality Map",
+      isLoggedIn: req.session?.user ? true : false,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Unable to load the pollution map page.",
+    });
+  }
+});
+
+// GET /reports/neighborhoods-geojson
+router.get("/neighborhoods-geojson", async (req, res) => {
+  try {
+    const filePath = path.join(process.cwd(), "data", "neighborhoods.geojson");
+    const geoData = await readFile(filePath, "utf-8");
+    return res.json(JSON.parse(geoData));
+  } catch (error) {
+    console.error("Failed to load neighborhoods geojson:", error);
+    return res.status(500).json({ error: "Failed to load neighborhood data" });
+  }
+});
+
+router.get("/airquality/map-data", async (req, res) => {
+  try {
+    const geoPath = path.join(process.cwd(), "data", "neighborhoods.geojson");
+    const geoRaw = await readFile(geoPath, "utf-8");
+    const geojson = JSON.parse(geoRaw);
+
+    const airData = await airQualityData.getAllForMap2023();
+    
+    const airLookup = {};
+    airData.forEach((d) => {
+      if (d.neighborhood) {
+          airLookup[d.neighborhood.trim().toLowerCase()] = d;
+      }
+    });
+
+    geojson.features.forEach((feature) => {
+      const name = 
+        feature.properties.ntaname || 
+        feature.properties.neighborhood || 
+        feature.properties.name || 
+        "";
+
+      const key = name.toLowerCase().trim();
+
+      if (airLookup[key]) {
+        feature.properties.airQuality = airLookup[key];
+        feature.properties.pollutionScore = airLookup[key].pollutionScore;
+      } else {
+        feature.properties.airQuality = null;
+        feature.properties.pollutionScore = "Unknown";
+      }
+    });
+
+    return res.json(geojson);
+  } catch (error) {
+    console.error("Map data error:", error);
+    return res.status(500).json({
+      error: "Failed to load map air-quality data",
+    });
+  }
+});
+
 
 // GET /reports/:id - View specific report (optional: public)
 router.get('/:id', async (req, res) => {
