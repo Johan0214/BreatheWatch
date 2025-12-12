@@ -1,7 +1,8 @@
-// tasks/seed.js
+// tasks/seed.js 
 // SEED SCRIPT FOR MULTIPLE USERS AND REPORTS
 
 import { MongoClient, ObjectId } from 'mongodb';
+import axios from 'axios';
 
 const mongoConfig = {
     serverUrl: 'mongodb://localhost:27017/',
@@ -42,7 +43,7 @@ const seedDatabase = async () => {
                 city: "Brooklyn",
                 state: "NY",
                 age: 30,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Test user for reports",
                 savedLocations: [],
@@ -56,7 +57,7 @@ const seedDatabase = async () => {
                 city: "Brooklyn",
                 state: "NY",
                 age: 28,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Alice test user",
                 savedLocations: [],
@@ -70,7 +71,7 @@ const seedDatabase = async () => {
                 city: "Queens",
                 state: "NY",
                 age: 35,
-                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...", // placeholder
+                hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
                 userType: "Renter",
                 profileDescription: "Bob test user",
                 savedLocations: [],
@@ -157,6 +158,29 @@ const seedDatabase = async () => {
                 { $set: { submittedReports: userReports.map(r => r._id) } }
             );
             console.log(`✓ Updated ${user.firstName}'s submittedReports (${userReports.length})`);
+        }
+
+        const airQualityCollection = db.collection('AirQualityData');
+        await airQualityCollection.deleteMany({});
+
+        const apiRes = await axios.get('https://data.cityofnewyork.us/resource/c3uy-2p5r.json?$limit=5000');
+
+        const rows = Array.isArray(apiRes.data) ? apiRes.data : [];
+
+        const airDocs = rows
+            .filter(r => r.name && r.geo_place_name && r.data_value)
+            .map(r => ({
+                pollutant: r.name,
+                neighborhood: r.geo_place_name,
+                value: Number(r.data_value),
+                timePeriod: r.time_period,
+                date: r.start_date
+            }))
+            .filter(r => !isNaN(r.value));
+
+        if (airDocs.length > 0) {
+            await airQualityCollection.insertMany(airDocs);
+            console.log(`Inserted ${airDocs.length} air quality records`);
         }
 
         console.log('========================================');

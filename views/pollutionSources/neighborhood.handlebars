@@ -1,0 +1,201 @@
+<div class="card">
+    <h1>Pollution Sources in {{neighborhood}}, {{borough}}</h1>
+    <p>Understanding where pollution comes from in your neighborhood.</p>
+
+    {{#if summary.totalSources}}
+        <!-- Summary Statistics -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>{{summary.totalSources}}</h3>
+                <p>Pollution Sources</p>
+            </div>
+            <div class="summary-card">
+                <h3>{{summary.totalContribution}}%</h3>
+                <p>Total Contribution</p>
+            </div>
+            <div class="summary-card primary">
+                <h3>{{summary.primarySource.sourceType}}</h3>
+                <p>Primary Source ({{summary.primarySource.estimatedContribution}}%)</p>
+            </div>
+        </div>
+
+        <!-- Primary Source Highlight -->
+        <div style="background: #feebc8; border-left: 4px solid #ed8936; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+            <h3 style="color: #7c2d12; margin-bottom: 0.5rem;">⚠️ Primary Pollution Source</h3>
+            <p style="margin: 0.5rem 0;"><strong>{{summary.primarySource.sourceType}}</strong> - Contributing {{summary.primarySource.estimatedContribution}}% to local pollution</p>
+            <p style="margin: 0; color: #744210;">{{summary.primarySource.description}}</p>
+        </div>
+
+        <!-- Source Breakdown by Type -->
+        <div style="margin: 2rem 0;">
+            <h2>Pollution Source Breakdown</h2>
+            <div class="breakdown-grid">
+                {{#each summary.sourceBreakdown}}
+                <div class="breakdown-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">{{@key}}</h3>
+                        <span class="source-badge {{@key}}">{{this.count}} sources</span>
+                    </div>
+                    
+                    <div class="contribution-bar-container">
+                        <div class="contribution-bar" style="width: {{this.totalContribution}}%;">
+                            <span class="contribution-text">{{this.totalContribution}}%</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        {{#each this.sources}}
+                        <div style="padding: 0.75rem; background: #f7fafc; border-radius: 4px; margin-bottom: 0.5rem;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #4a5568;">{{this.description}}</p>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                <span style="font-size: 0.85rem; color: #718096;">{{this.estimatedContribution}}% contribution</span>
+                                <span style="font-size: 0.85rem; color: #718096;">Year: {{this.dataYear}}</span>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <!-- All Sources Detailed List -->
+        <div style="margin: 2rem 0;">
+            <h2>All Sources ({{summary.totalSources}})</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Source Type</th>
+                            <th>Description</th>
+                            <th>Contribution</th>
+                            <th>Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each summary.allSources}}
+                        <tr>
+                            <td><span class="source-badge {{this.sourceType}}">{{this.sourceType}}</span></td>
+                            <td>{{this.description}}</td>
+                            <td>
+                                <strong>{{this.estimatedContribution}}%</strong>
+                            </td>
+                            <td>{{this.dataYear}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    {{else}}
+        <div style="text-align: center; padding: 3rem; background: #f7fafc; border-radius: 8px;">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">No pollution source data available for this neighborhood.</p>
+            <p style="color: #718096; margin-bottom: 2rem;">We don't have detailed pollution source information for {{neighborhood}} yet.</p>
+            <a href="/pollution-sources" class="btn">View All Sources</a>
+        </div>
+    {{/if}}
+
+    <div style="margin-top: 2rem;">
+        <a href="/pollution-sources" class="btn btn-secondary">← Back to All Sources</a>
+        <a href="/reports/create?neighborhood={{neighborhood}}&borough={{borough}}" class="btn" style="margin-left: 1rem;">Report Pollution Issue</a>
+    </div>
+</div>
+
+<style>
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.summary-card.primary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.summary-card h3 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.summary-card p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.breakdown-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.source-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.source-badge.Traffic {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.source-badge.Industrial {
+    background: #feebc8;
+    color: #7c2d12;
+}
+
+.source-badge.Construction {
+    background: #fefcbf;
+    color: #744210;
+}
+
+.source-badge.Residential {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.source-badge.Other {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+.contribution-bar-container {
+    background: #e2e8f0;
+    border-radius: 8px;
+    height: 30px;
+    overflow: hidden;
+}
+
+.contribution-bar {
+    background: linear-gradient(90deg, #48bb78, #38a169);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+}
+
+.contribution-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+</style>

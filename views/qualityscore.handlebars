@@ -1,0 +1,75 @@
+<div class="container">
+
+    <h1 class="home-title" style="text-align:center; color: var(--primary-dark); margin-bottom:1.5rem;">
+        Neighborhood Air Quality Score
+    </h1>
+
+    <p class="subtitle" style="text-align:center; margin-bottom:2rem;">
+        Enter a neighborhood to check PM2.5 & NO₂ pollution levels.
+    </p>
+
+    <form action="/airQuality/score" method="GET" class="search-form-quality">
+        <label for="neighborhood" style="font-weight:bold;">Neighborhood</label>
+        <input 
+            type="text" 
+            id="neighborhood" 
+            name="neighborhood" 
+            placeholder="Example: Astoria, Chelsea, East Flatbush"
+            required
+        >
+        <button type="submit" class="button primary">Check Score</button>
+    </form>
+
+<div class="neighborhood-examples">
+    <h3>Example neighborhoods (type exactly like this):</h3>
+
+    <ul class="neighborhood-example-list">
+        <li>West Queens</li>
+        <li>East Flatbush - Flatbush</li>
+        <li>Greenpoint</li>
+        <li>Upper West Side</li>
+        <li>Washington Heights</li>
+        <li>East Harlem</li>
+        <li>Hunts Point - Mott Haven</li>
+        <li>Fordham - Bronx Pk</li>
+        <li>Bedford Stuyvesant - Crown Heights</li>
+        <li>Flushing - Clearview</li>
+        <li>Rockaways</li>
+        <li>Jamaica</li>
+        <li>Southeast Queens</li>
+        <li>Sunset Park</li>
+        <li>Staten Island</li>
+    </ul>
+</div>
+    {{#if error}}
+    <div class="error-message" style="margin-top: 2rem;">
+        {{error}}
+    </div>
+    {{/if}}
+
+    {{#if score}}
+    <div class="score-card">
+        <h2 style="color: var(--secondary-color); margin-bottom:1rem;">
+            Results for {{neighborhood}}
+        </h2>
+
+        <p><strong>PM2.5 Level:</strong> {{pm25}} 
+            <span class="score-pill {{score.pm25}}">{{score.pm25}}</span>
+        </p>
+
+        <p style="margin-top:0.75rem;"><strong>NO₂ Level:</strong> {{no2}} 
+            <span class="score-pill {{score.no2}}">{{score.no2}}</span>
+        </p>
+
+        <h3 style="margin-top:1.5rem; font-size:1.4rem; color: var(--primary-dark);">
+            Overall Air Quality:
+            <span class="score-pill {{score.overall}}">{{score.overall}}</span>
+        </h3>
+
+        <p style="margin-top:1rem; font-size:0.9rem; color:#666;">
+            * Based on EPA exposure guidelines for particulate matter and nitrogen dioxide.
+        </p>
+    </div>
+    {{/if}}
+
+</div>
