@@ -310,3 +310,36 @@ nav {
     background-color: var(--error-color);
     color: white;
 }
+
+.neighborhood-examples {
+    margin-top: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-light);
+    padding: 1.25rem;
+    border: 1px solid #ddd;
+}
+
+.neighborhood-examples h3 {
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.neighborhood-example-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-left: 0;
+    margin: 0;
+}
+
+.neighborhood-example-list li {
+    background-color: #f0f4f1;
+    border: 1px solid #d6e5d8;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
