@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 // GET /reports/my - View user's reports (protected)
 router.get('/my', protectRoute, async (req, res) => {
     try {
-        const userId = req.session.user.userId;
+        const userId = req.session.user._id;
         const reportsList = await reportsData.getReportsByUser(userId);
 
         res.render('reports/myReports', {
@@ -80,7 +80,7 @@ router.post('/create', protectRoute, async (req, res) => {
         const { neighborhood, borough, description, reportType, severity } = req.body;
 
         const newReport = await reportsData.createReport(
-            req.session.user.userId,
+            req.session.user._id,
             neighborhood,
             borough,
             description,

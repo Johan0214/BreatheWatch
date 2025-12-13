@@ -37,7 +37,7 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
 
     // After successful login
     req.session.user = {
-        userId: user._id.toString(), // must be string
+        _id: user._id.toString(), // must be string
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName
@@ -72,7 +72,7 @@ router.post('/signup', async (req, res) => {
 
     const user = await userData.createUser(firstName, lastName, username, password);
     req.session.user = {
-        userId: user._id.toString(),
+        _id: user._id.toString(),
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -118,7 +118,7 @@ router.get('/profile', async (req, res) => {
     }
 
     try {
-        const userFromDb = await userData.getUserById(req.session.user.userId);
+        const userFromDb = await userData.getUserById(req.session.user._id);
         return res.render('profileView', {
             title: 'Your Profile',
             user: userFromDb,
@@ -167,7 +167,7 @@ router.post('/profile', async (req, res) => {
 
     try {
         const updatedUser = await userData.updateUserProfile(
-            req.session.user.userId, 
+            req.session.user._id, 
             xss(city), 
             xss(state), 
             parseInt(age), 
@@ -175,7 +175,7 @@ router.post('/profile', async (req, res) => {
         );
         
         req.session.user = {
-            userId: updatedUser._id.toString(), 
+            _id: updatedUser._id.toString(), 
             firstName: updatedUser.firstName, 
             lastName: updatedUser.lastName, 
             username: updatedUser.username, 
@@ -238,7 +238,7 @@ router.post('/profile/setup', async (req, res) => {
 
     try {
         const updatedUser = await userData.updateUserProfile(
-            req.session.user.userId, 
+            req.session.user._id, 
             xss(city), 
             xss(state), 
             parseInt(age), 
@@ -246,7 +246,7 @@ router.post('/profile/setup', async (req, res) => {
         );
         
         req.session.user = {
-            userId: updatedUser._id.toString(), 
+            _id: updatedUser._id.toString(), 
             firstName: updatedUser.firstName, 
             lastName: updatedUser.lastName, 
             username: updatedUser.username, 
