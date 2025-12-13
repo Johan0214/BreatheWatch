@@ -1,0 +1,63 @@
+<div class="container">
+    <h1 style="text-align:center; color: var(--primary-dark);">
+        Air Quality Trends for {{neighborhood}}
+    </h1>
+
+    {{#if error}}
+        <div class="error-message">{{error}}</div>
+    {{else}}
+        <canvas id="trendChart" width="400" height="200"></canvas>
+    {{/if}}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const rawData = {{{data}}};
+
+    const labels = [];
+    const pm25Data = [];
+    const no2Data = [];
+
+    rawData.forEach(entry => {
+        if (!labels.includes(entry.timePeriod)) {
+            labels.push(entry.timePeriod);
+        }
+
+        if (entry.pollutant.includes('PM')) {
+            pm25Data.push(entry.value);
+        }
+
+        if (entry.pollutant.includes('Nitrogen')) {
+            no2Data.push(entry.value);
+        }
+    });
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'PM2.5',
+                    data: pm25Data,
+                    borderWidth: 2
+                },
+                {
+                    label: 'NO₂',
+                    data: no2Data,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>

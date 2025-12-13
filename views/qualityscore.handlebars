@@ -14,12 +14,33 @@
             type="text" 
             id="neighborhood" 
             name="neighborhood" 
-            placeholder="Example: Astoria, Chelsea, East Flatbush"
+            placeholder="Example: West Queens, East Flatbush - Flatbush, etc."
             required
         >
         <button type="submit" class="button primary">Check Score</button>
     </form>
 
+    <div class="neighborhood-examples">
+        <h3>Example neighborhoods (type exactly like this):</h3>
+
+        <ul class="neighborhood-example-list">
+            <li>West Queens</li>
+            <li>East Flatbush - Flatbush</li>
+            <li>Greenpoint</li>
+            <li>Upper West Side</li>
+            <li>Washington Heights</li>
+            <li>East Harlem</li>
+            <li>Hunts Point - Mott Haven</li>
+            <li>Fordham - Bronx Pk</li>
+            <li>Bedford Stuyvesant - Crown Heights</li>
+            <li>Flushing - Clearview</li>
+            <li>Rockaways</li>
+            <li>Jamaica</li>
+            <li>Southeast Queens</li>
+            <li>Sunset Park</li>
+            <li>Staten Island</li>
+        </ul>
+    </div>
 
     {{#if error}}
     <div class="error-message" style="margin-top: 2rem;">
@@ -49,6 +70,14 @@
         <p style="margin-top:1rem; font-size:0.9rem; color:#666;">
             * Based on EPA exposure guidelines for particulate matter and nitrogen dioxide.
         </p>
+
+        <a 
+          href="/airQuality/trends?neighborhood={{neighborhood}}" 
+          class="button secondary" 
+          style="margin-top:1rem; display:inline-block;"
+        >
+            View Historical Trends
+        </a>
     </div>
     {{/if}}
 
