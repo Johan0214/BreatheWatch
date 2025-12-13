@@ -81,6 +81,7 @@ app.get('/', (req, res) => {
    =========================== */
 app.use('/', authRoutes);
 app.use('/home', (await import('./routes/home.js')).default);
+app.use('/dashboard', (await import('./routes/dashboard.js')).default);
 app.use('/reports', (await import('./routes/reports.js')).default);
 app.use('/airQuality', airQualityRoutes);
 app.use('/pollution-sources', pollutionRoutes);

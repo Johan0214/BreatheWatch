@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 /**
  * Checks if a value is a non-empty string and trims it.
  * @param {string} val - The value to check.
@@ -58,11 +59,61 @@ export const checkNumber = (val, varName) => {
   return val;
 };
 
+export const checkAge = (age, varName) => {
+    if (age === null || age === undefined || age === '') {
+        throw `${varName} must be provided.`;
+    }   
+    let parsedAge;
+    if (typeof age === 'string') {
+        parsedAge = parseInt(age.trim());
+    } else if (typeof age === 'number') {
+        parsedAge = age;
+    } else {
+        throw `${varName} must be a number or a string representing a number.`;
+    }
+
+    if (isNaN(parsedAge)) {
+        throw `${varName} must be a valid number.`;
+    }
+
+    if (!Number.isInteger(parsedAge)) {
+        throw `${varName} must be a whole number (integer).`;
+    }
+    
+    const MIN_AGE = 18;
+    const MAX_AGE = 120; 
+    
+    if (parsedAge < MIN_AGE || parsedAge > MAX_AGE) {
+        throw `${varName} must be between ${MIN_AGE} and ${MAX_AGE}.`;
+    }
+
+    return parsedAge;
+};
+
+/**
+ * Checks if a value is a valid MongoDB ObjectId.
+ * @param {string} id The ID to check.
+ * @param {string} varName The name of the variable being checked.
+ * @returns {string} The validated and trimmed ID.
+ * @throws {Error} If the ID is invalid.
+ */
+export const checkId = (id, varName) => {
+    if (!id) throw `Error: ${varName} must be provided.`;
+    if (typeof id !== 'string') throw `Error: ${varName} must be a string.`;
+    id = id.trim();
+    if (id.length === 0) throw `Error: ${varName} cannot be an empty string.`;
+    if (!ObjectId.isValid(id)) throw `Error: ${varName} is not a valid MongoDB ObjectId.`;
+    return id;
+};
+
 const exportedMethods = {
     checkString,
     checkUsername,
     checkPassword,
-    checkNumber
+    checkNumber,
+    checkPassword,
+    checkAge,
+    checkId
 };
 
 export default exportedMethods;

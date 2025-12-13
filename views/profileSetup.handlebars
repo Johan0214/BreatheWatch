@@ -1,0 +1,137 @@
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: left;
+    }
+    .profile-container h1 {
+        color: #e91e63; /* Use a distinct color for setup urgency */
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .profile-container .subtitle {
+        margin-bottom: 2rem;
+        color: #555;
+        text-align: center;
+        font-weight: bold;
+    }
+    .auth-form {
+        display: grid;
+        gap: 15px;
+    }
+    .form-group {
+        margin-bottom: 0;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box; 
+    }
+    #profileDescription {
+        resize: vertical;
+        min-height: 100px;
+    }
+    .message-box {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: left;
+    }
+    .message-box.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .setup-warning {
+        padding: 15px;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+</style>
+
+<div class="profile-container">
+    <h1>{{title}}</h1>
+    <p class="subtitle">Welcome! Please finish setting up your profile to continue to BreatheWatch.</p>
+
+    {{#if hasErrors}}
+        <div class="message-box error">
+            <p>Errors occurred during submission:</p>
+            <ul>
+                {{#each errors}}
+                    <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/if}}
+
+    <form action="/profile/setup" method="POST" class="auth-form">
+        
+        <div class="form-group">
+            <label for="city">City</label>
+            <input 
+                type="text" 
+                id="city" 
+                name="city" 
+                value="{{user.city}}" 
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="state">State</label>
+            <input 
+                type="text" 
+                id="state" 
+                name="state" 
+                value="{{user.state}}" 
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input 
+                type="number" 
+                id="age" 
+                name="age" 
+                value="{{user.age}}" 
+                required 
+                min="1" 
+                max="150"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="profileDescription">Your Profile Description</label>
+            <textarea 
+                id="profileDescription" 
+                name="profileDescription" 
+                rows="5" 
+                maxlength="500" 
+                placeholder="Example: I'm looking for a clean-air neighborhood..."
+                required
+            >{{user.profileDescription}}</textarea>
+            <small>Max 500 characters.</small>
+        </div>
+        
+        <button type="submit" class="button primary">Complete Setup</button>
+    </form>
+</div>
