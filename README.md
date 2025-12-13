@@ -10,5 +10,4 @@ The goal of BreatheWatch is to make environmental health information easy to und
 
 # How To Run
 
-To run the application in your local environment, clone this repository and use the command
-''' npm start '''
+To run the application locally, clone this repository and install the required dependencies using npm install. Then, seed the database by running npm run seed-all, which populates all required data. Once the seeding is complete, start the application using npm start.
