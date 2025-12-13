@@ -8,13 +8,10 @@
     <p>Check the latest report for your area. Knowing your air is the first step to better health.</p>
     <div style="display: flex; gap: 0.5rem; justify-content: center;">
         <a href="/reports/pollution-map" class="button primary">View Live Map</a>
+        <a href="/airQuality/score" class="button secondary">Check Neighborhood Score</a>
     </div>
 </div>
 
-<div style="display: flex; gap: 0.5rem; justify-content: center;">
-    <a href="/map" class="button primary">View Live Map</a>
-    <a href="/airQuality/score" class="button secondary">Check Neighborhood Score</a>
-</div>
 
 {{!-- Conditional rendering based on whether the user is logged in --}}
 {{#if isLoggedIn}}
