@@ -22,12 +22,18 @@ export const createUser = async (firstName, lastName, username, password) => {
     if (existing) throw 'Username already exists.';
 
     const hashed = await bcrypt.hash(password, saltRounds);
-    const newUser = { firstName, lastName, username: username.toLowerCase(), password: hashed, 
+    const newUser = { 
+        firstName, 
+        lastName, 
+        username: username.toLowerCase(), 
+        password: hashed, 
         profileDescription: '', 
-        city: '',
-        state: '',
+        borough: '',
+        neighborhood: '',
         age: null,
-        isProfileConfigured: false, createdAt: new Date() };
+        isProfileConfigured: false, 
+        createdAt: new Date() 
+    };
     const insertInfo = await usersCollection.insertOne(newUser);
     if (!insertInfo.acknowledged || !insertInfo.insertedId) throw 'Could not create user.';
     newUser._id = insertInfo.insertedId.toString();
@@ -61,38 +67,34 @@ export const getUserById = async (id) => {
     return user;
 };
 
-export const updateUserProfile = async (userId, city, state, age, description, isProfileConfigured = true) => {
+export const updateUserProfile = async (userId, borough, neighborhood, age, description, isProfileConfigured = true) => {
     userId = validation.checkId(userId, 'User ID');
     
-    city = validation.checkString(city, 'City', false); 
-    state = validation.checkString(state, 'State', false);
+    borough = validation.checkString(borough, 'Borough', false);
+    neighborhood = validation.checkString(neighborhood, 'Neighborhood', false);
     age = validation.checkAge(age, 'Age');
     description = validation.checkString(description, 'Profile Description', true); 
 
-    if (description.length > 500) {
-        throw 'Profile description must be 500 characters or less.';
-    }
-    
+    if (description.length > 500) throw 'Profile description must be 500 characters or less.';
+
     const usersCollection = await usersCollectionFn();
     const updateInfo = await usersCollection.updateOne(
         { _id: new ObjectId(userId) },
         { 
             $set: { 
-                city: city, 
-                state: state, 
-                age: age,
+                borough, 
+                neighborhood, 
+                age,
                 profileDescription: description,
                 isProfileConfigured: true
             } 
         }
     );
 
-    if (updateInfo.modifiedCount === 0 && updateInfo.matchedCount === 1) {
-    } else if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user to update.';
-    }
+    if (updateInfo.matchedCount === 0) throw 'Could not find user to update.';
 
     return await getUserById(userId);
 };
+
 
 export default { createUser, checkUser, getUserById, updateUserProfile };

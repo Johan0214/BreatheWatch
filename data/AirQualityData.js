@@ -76,22 +76,29 @@ export const upsertAirQualityRecord = async ({
 }
 };
 
-export const getByNeighborhoodYear = async (neighborhood, year = 2023) => {
+export const getByNeighborhoodYear = async (borough, neighborhood, year = 2023) => {
   const collection = await airQualityData();
 
+  borough = normalizeName(borough, "Borough");
   neighborhood = normalizeName(neighborhood, "Neighborhood");
 
+  // Use regex for partial, case-insensitive match
   const doc = await collection.findOne({
-    neighborhood,
+    borough: { $regex: `^${borough}$`, $options: "i" },
+    neighborhood: { $regex: neighborhood, $options: "i" },
     year,
   });
 
   if (!doc) {
-    throw `No air-quality data found for ${neighborhood} for year ${year}`;
+    console.warn(`No air-quality data found for ${neighborhood}, ${borough} for year ${year}`);
+    return null;
   }
 
   return doc;
 };
+
+
+
 
 export const getAllForMap2023 = async () => {
   const collection = await airQualityData();
