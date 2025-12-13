@@ -20,7 +20,7 @@ router.get('/', protectRoute, async (req, res) => {
     let currentRisk = 'Data Unavailable';
 
     try {
-        const user = await usersData.getUserById(userId); 
+        const user = await usersData.getUserById(req.session.user._id); 
         const reports = await reportsData.getReportsByUser(userId);
 
         res.render('dashboard', {
@@ -28,7 +28,7 @@ router.get('/', protectRoute, async (req, res) => {
             user: user,
             reports: reports,
             currentRisk: currentRisk,
-            isLoggedIn: true 
+            isLoggedIn: isLoggedIn 
         });
 
     } catch (e) {

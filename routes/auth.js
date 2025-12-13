@@ -166,7 +166,7 @@ router.post('/profile', async (req, res) => {
     }
 
     try {
-        const updatedUser = await updateUserProfile(
+        const updatedUser = await userData.updateUserProfile(
             req.session.user.userId, 
             xss(city), 
             xss(state), 
