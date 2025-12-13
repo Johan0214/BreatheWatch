@@ -88,7 +88,6 @@ app.use('/dashboard', (await import('./routes/dashboard.js')).default);
 app.use('/reports', (await import('./routes/reports.js')).default);
 app.use('/airQuality', airQualityRoutes);
 app.use('/pollution-sources', pollutionRoutes);
-app.use('/profile', (await import('./routes/profile.js')).default);
 
 
 /* ===========================
