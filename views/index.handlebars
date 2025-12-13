@@ -1,24 +1,22 @@
 <div class="home-container">
-    <h1>Monitor Your Air, Protect Your Health.</h1>
-    <p class="subtitle">BreatheWatch provides real-time air quality data and personalized recommendations.</p>
+    <h1>Monitor Your Air, Protect Your Health</h1>
+    <p class="subtitle">BreatheWatch provides real-time air quality data and personalized recommendations tailored to your neighborhood.</p>
 </div>
 
 <div class="cta-card">
-    <h3>Current Air Quality Status</h3>
-    <p>Check the latest report for your area. Knowing your air is the first step to better health.</p>
-    <div style="display: flex; gap: 0.5rem; justify-content: center;">
-        <a href="/reports/pollution-map" class="button primary">View Live Map</a>
+    <h3>Current Air Quality</h3>
+    <p>View the latest air quality for your area. Stay informed and make healthier choices.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+        <a href="/map" class="button primary">View Live Map</a>
         <a href="/airQuality/score" class="button secondary">Check Neighborhood Score</a>
     </div>
 </div>
-
-
-{{!-- Conditional rendering based on whether the user is logged in --}}
+{{!-- Conditional rendering based on login status --}}
 {{#if isLoggedIn}}
 <div class="cta-card secondary">
     <h3>Welcome back, {{user.firstName}}!</h3>
-    <p>Head over to your dashboard to view your logged reports and manage your settings.</p>
-    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+    <p>Access your dashboard to track reports, view alerts, and manage your profile.</p>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
         <a href="/dashboard" class="button secondary">Go to Dashboard</a>
         <a href="/reports" class="button primary">View Reports</a>
         <a href="/logout" class="button tertiary">Logout</a>
@@ -26,9 +24,9 @@
 </div>
 {{else}}
 <div class="cta-card secondary">
-    <h3>Ready to take control of your environment?</h3>
-    <p>Sign up now to start logging reports, save favorite locations, and receive personalized health alerts.</p>
-    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+    <h3>Get Started with BreatheWatch</h3>
+    <p>Create an account to log reports, save favorite locations, and receive personalized health alerts.</p>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
         <a href="/signup" class="button primary">Create Account</a>
         <a href="/login" class="button secondary">Login</a>
     </div>

@@ -1,3 +1,4 @@
+// tasks/seedAirQuality.js
 import { MongoClient } from "mongodb";
 import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
@@ -23,26 +24,25 @@ const main = async () => {
     console.log("Connecting to MongoDB…");
     client = await MongoClient.connect(mongoConfig.serverUrl);
     const db = client.db(mongoConfig.database);
-    console.log("connected to: ", mongoConfig.database);
+    console.log("Connected to database:", mongoConfig.database);
 
     const airQualityCollection = db.collection("AirQualityData");
+
+    // Clear existing 2023 data
     const deleteResult = await airQualityCollection.deleteMany({ year: 2023 });
     console.log(`Cleared ${deleteResult.deletedCount} existing 2023 records`);
 
+    // Load air quality dataset
     const dataPath = join(__dirname, "..", "data", "air_quality_2023.json");
     const raw = await readFile(dataPath, "utf-8");
-
     const records = JSON.parse(raw);
-    if (!Array.isArray(records) || records.length === 0) {
-      console.log("No records found in pollution json");
-      return;
-    }
 
+    // Load geojson for all neighborhoods
     const geoPath = join(__dirname, "..", "data", "neighborhoods.geojson");
     const geoRaw = await readFile(geoPath, "utf-8");
     const geojson = JSON.parse(geoRaw);
-    console.log(Object.keys(geojson.features[0].properties));
 
+    // Build geoNeighborhoods array
     const geoNeighborhoods = geojson.features
       .map((f) => {
         const neighborhood = (
@@ -52,70 +52,53 @@ const main = async () => {
           f.properties.name ||
           ""
         ).trim();
-
         const borough = (
-            f.properties.boro_name ||
-            f.properties.boroname ||
-            f.properties.borough || 
-            ""
+          f.properties.boro_name ||
+          f.properties.boroname ||
+          f.properties.borough ||
+          ""
         ).trim();
         const ntaCode = f.properties.nta_code || f.properties.ntacode || null;
-
         return { neighborhood, borough, ntaCode };
       })
       .filter((x) => x.neighborhood && x.borough);
 
+    // Build dataset lookup by lowercase neighborhood
     const datasetLookup = {};
-
     records.forEach((r) => {
-      const neighborhood = (r.neighborhood || "").trim();
+      const neighborhood = (r.neighborhood || "").trim().toLowerCase();
       const borough = (r.borough || "").trim();
-      if (!neighborhood || !borough) return;
-
       const pm25 = Number(r.pm25);
       const no2 = Number(r.no2);
-
-      if (!Number.isNaN(pm25) && !Number.isNaN(no2)) {
-        datasetLookup[neighborhood.toLowerCase()] = {
-          borough,
-          pm25,
-          no2,
-        };
+      if (neighborhood && borough && !isNaN(pm25) && !isNaN(no2)) {
+        datasetLookup[neighborhood] = { borough, pm25, no2 };
       }
     });
 
+    // Compute borough averages for fallback
     const boroughBuckets = {};
-
     Object.values(datasetLookup).forEach((d) => {
-      if (!boroughBuckets[d.borough]) {
-        boroughBuckets[d.borough] = { pm25: [], no2: [] };
-      }
+      if (!boroughBuckets[d.borough]) boroughBuckets[d.borough] = { pm25: [], no2: [] };
       boroughBuckets[d.borough].pm25.push(d.pm25);
       boroughBuckets[d.borough].no2.push(d.no2);
     });
 
     const boroughAverages = {};
-
     Object.keys(boroughBuckets).forEach((b) => {
-      const avg = (arr) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
-      boroughAverages[b] = {
-        pm25: avg(boroughBuckets[b].pm25),
-        no2: avg(boroughBuckets[b].no2),
-      };
+      const avg = (arr) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null);
+      boroughAverages[b] = { pm25: avg(boroughBuckets[b].pm25), no2: avg(boroughBuckets[b].no2) };
     });
 
+    // Create documents for all geoNeighborhoods
     const docs = geoNeighborhoods.map(({ neighborhood, borough, ntaCode }) => {
       const hit = datasetLookup[neighborhood.toLowerCase()];
-
       const finalPM25 = hit?.pm25 ?? boroughAverages[borough]?.pm25 ?? 8;
-
       const finalNO2 = hit?.no2 ?? boroughAverages[borough]?.no2 ?? 25;
-
       const pollutionScore = computePollutionScore(finalPM25, finalNO2);
 
       return {
-        borough,
-        neighborhood,
+        borough: borough.trim().toLowerCase(),
+        neighborhood: neighborhood.trim().toLowerCase(),
         ntaCode,
         year: 2023,
         pollutants: {
@@ -124,30 +107,26 @@ const main = async () => {
           Ozone: null,
         },
         pollutionScore,
-        dataSource: hit
-          ? "NYC Open Data (Neighborhood)"
-          : "NYC Open Data (Borough-derived NTA)",
+        dataSource: hit ? "NYC Open Data (Neighborhood)" : "NYC Open Data (Borough-derived NTA)",
         lastUpdated: new Date(),
       };
     });
 
-    if (!docs.length) {
-  throw new Error("No Air Quality Data documents generated.");
-}
 
+    if (!docs.length) throw new Error("No Air Quality Data documents generated.");
+
+    // Insert all docs
     const insertResult = await airQualityCollection.insertMany(docs);
-    console.log(
-      `Inserted ${insertResult.insertedCount} AirQualityData records`
-    );
+    console.log(`Inserted ${insertResult.insertedCount} AirQualityData records`);
     console.log("NTA neighborhoods:", geoNeighborhoods.length);
     console.log("Dataset neighborhoods:", Object.keys(datasetLookup).length);
     console.log("Docs to insert:", docs.length);
 
     console.log("========================================");
-    console.log("AirQualityData seed completed!");
+    console.log("✅ AirQualityData seed completed!");
     console.log("========================================");
   } catch (error) {
-    console.error("Error in seeding air quality data: ", error);
+    console.error("❌ Error in seeding air quality data:", error);
     throw error;
   } finally {
     if (client) {

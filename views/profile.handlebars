@@ -1,177 +1,49 @@
 <div class="profile-container">
-    <h1>Edit Your BreatheWatch Profile</h1>
-    <p class="subtitle">This description helps personalize air quality recommendations.</p>
-
-    <!-- Message box to display AJAX success/error feedback -->
-    <div id="profile-message-box" class="message-box hidden"></div>
-
-    <form id="profile-form" class="auth-form">
-        <div class="form-group">
-            <label for="profileDescription">Your Profile Description</label>
-            <textarea 
-                id="profileDescription" 
-                name="profileDescription" 
-                rows="5" 
-                maxlength="500" 
-                placeholder="Example: I'm a renter looking for a clean-air neighborhood for my kids, avoiding heavy traffic areas."
-                required
-            >{{user.profileDescription}}</textarea>
-            <small>Max 500 characters.</small>
-        </div>
-        
-        <button type="submit" id="save-profile-button" class="button primary">Save Profile</button>
-    </form>
-    
-    <p class="back-link"><a href="/home">← Back to Dashboard</a></p>
-</div>
-
-<style>
-.profile-container {
-    max-width: 600px;
-    margin: 3rem auto;
-    padding: 30px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: left;
-}
-.profile-container h1 {
-    color: #03a9f4; /* Using a primary blue color */
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-.profile-container .subtitle {
-    margin-bottom: 2rem;
-    color: #555;
-    text-align: center;
-}
-.profile-container .auth-form {
-    display: grid;
-    gap: 15px;
-}
-.form-group {
-    margin-bottom: 0;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-}
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box; 
-}
-#profileDescription {
-    resize: vertical;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    width: 100%;
-}
-.message-box {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: left;
-    transition: opacity 0.3s ease;
-}
-.message-box.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-.message-box.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.hidden {
-    display: none;
-}
-.back-link {
-    margin-top: 2rem;
-}
-</style>
-
-<div class="profile-container">
     <h1>{{title}}</h1>
-    <p class="subtitle">Update your location, age, and profile description.</p>
+    <p class="subtitle">Update your borough, neighborhood, age, and profile description.</p>
 
     {{#if query.success}}
-        <div class="message-box success">
-            Profile updated successfully!
-        </div>
+        <div class="message-box success">Profile updated successfully!</div>
     {{/if}}
 
     {{#if hasErrors}}
         <div class="message-box error">
             <p>Errors occurred during update:</p>
-            <ul>
-                {{#each errors}}
-                    <li>{{this}}</li>
-                {{/each}}
-            </ul>
+            <ul>{{#each errors}}<li>{{this}}</li>{{/each}}</ul>
         </div>
     {{/if}}
 
     <form action="/profile" method="POST" class="auth-form">
-        
         <div class="form-group">
-            <label for="city">City</label>
-            <input 
-                type="text" 
-                id="city" 
-                name="city" 
-                value="{{user.city}}" 
-                required
-            >
+            <label for="borough">Borough</label>
+            <select id="borough" name="borough" required>
+                <option value="">Select your borough</option>
+                <option value="Manhattan" {{#if (eq user.borough "Manhattan")}}selected{{/if}}>Manhattan</option>
+                <option value="Brooklyn" {{#if (eq user.borough "Brooklyn")}}selected{{/if}}>Brooklyn</option>
+                <option value="Queens" {{#if (eq user.borough "Queens")}}selected{{/if}}>Queens</option>
+                <option value="Bronx" {{#if (eq user.borough "Bronx")}}selected{{/if}}>Bronx</option>
+                <option value="Staten Island" {{#if (eq user.borough "Staten Island")}}selected{{/if}}>Staten Island</option>
+            </select>
         </div>
 
         <div class="form-group">
-            <label for="state">State</label>
-            <input 
-                type="text" 
-                id="state" 
-                name="state" 
-                value="{{user.state}}" 
-                required
-            >
+            <label for="neighborhood">Neighborhood</label>
+            <input type="text" id="neighborhood" name="neighborhood" value="{{user.neighborhood}}" placeholder="Example: Williamsburg" required>
         </div>
 
         <div class="form-group">
             <label for="age">Age</label>
-            <input 
-                type="number" 
-                id="age" 
-                name="age" 
-                value="{{user.age}}" 
-                required 
-                min="1" 
-                max="150"
-            >
+            <input type="number" id="age" name="age" value="{{user.age}}" required min="18" max="120">
         </div>
 
         <div class="form-group">
-            <label for="profileDescription">Your Profile Description</label>
-            <textarea 
-                id="profileDescription" 
-                name="profileDescription" 
-                rows="5" 
-                maxlength="500" 
-                placeholder="Example: I'm looking for a clean-air neighborhood..."
-                required
-            >{{user.profileDescription}}</textarea>
+            <label for="profileDescription">Profile Description</label>
+            <textarea id="profileDescription" name="profileDescription" rows="5" maxlength="500" required>{{user.profileDescription}}</textarea>
             <small>Max 500 characters.</small>
         </div>
-        
+
         <button type="submit" class="button primary">Update Profile</button>
     </form>
-    
+
     <p class="back-link"><a href="/home">← Back to Home</a></p>
 </div>

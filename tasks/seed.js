@@ -1,8 +1,9 @@
 // tasks/seed.js 
-// SEED SCRIPT FOR MULTIPLE USERS AND REPORTS
+// SEED SCRIPT FOR MULTIPLE USERS AND REPORTS (FIXED VERSION)
 
 import { MongoClient, ObjectId } from 'mongodb';
-import axios from 'axios';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 const mongoConfig = {
     serverUrl: 'mongodb://localhost:27017/',
@@ -24,23 +25,25 @@ const seedDatabase = async () => {
 
         const usersCollection = db.collection('Users');
         const reportsCollection = db.collection('Reports');
+        const airQualityCollection = db.collection('AirQualityData');
 
-        // Clear existing reports
-        const deleteReports = await reportsCollection.deleteMany({});
-        console.log(`✓ Cleared ${deleteReports.deletedCount} existing reports`);
+        // Clear existing reports and air quality data
+        await reportsCollection.deleteMany({});
+        console.log('✓ Cleared existing reports');
 
-        // Clear existing users (optional, comment out if you want to keep real users)
-        // const deleteUsers = await usersCollection.deleteMany({});
-        // console.log(`✓ Cleared ${deleteUsers.deletedCount} existing users`);
+        await airQualityCollection.deleteMany({});
+        console.log('✓ Cleared existing AirQualityData');
 
-        // Define users
+        // --- Seed Users ---
         const testUsers = [
             {
                 _id: new ObjectId(),
                 firstName: "Test",
                 lastName: "User",
                 email: "test@test.com",
-                city: "Brooklyn",
+                city: "New York",
+                borough: "Brooklyn",
+                neighborhood: "Williamsburg",
                 state: "NY",
                 age: 30,
                 hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
@@ -54,7 +57,9 @@ const seedDatabase = async () => {
                 firstName: "Alice",
                 lastName: "Smith",
                 email: "alice@example.com",
-                city: "Brooklyn",
+                city: "New York",
+                borough: "Brooklyn",
+                neighborhood: "Park Slope",
                 state: "NY",
                 age: 28,
                 hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
@@ -68,7 +73,9 @@ const seedDatabase = async () => {
                 firstName: "Bob",
                 lastName: "Jones",
                 email: "bob@example.com",
-                city: "Queens",
+                city: "New York",
+                borough: "Queens",
+                neighborhood: "Astoria",
                 state: "NY",
                 age: 35,
                 hashedPassword: "$2a$10$E5h9uX5fRTrqgqeG8dRfCe...",
@@ -87,11 +94,11 @@ const seedDatabase = async () => {
                 console.log(`✓ Created user: ${u.firstName} ${u.lastName}`);
             } else {
                 console.log(`✓ User already exists: ${existing.firstName} ${existing.lastName}`);
-                u._id = existing._id; // keep the real ObjectId
+                u._id = existing._id; // keep ObjectId
             }
         }
 
-        // Sample reports
+        // --- Seed Reports ---
         const sampleReports = [
             {
                 neighborhood: 'Harlem',
@@ -148,7 +155,7 @@ const seedDatabase = async () => {
 
         // Insert reports
         const insertResult = await reportsCollection.insertMany(sampleReports);
-        console.log(`✓ Inserted ${insertResult.insertedCount} reports across users`);
+        console.log(`✓ Inserted ${insertResult.insertedCount} reports`);
 
         // Update each user's submittedReports
         for (let user of testUsers) {
@@ -160,27 +167,28 @@ const seedDatabase = async () => {
             console.log(`✓ Updated ${user.firstName}'s submittedReports (${userReports.length})`);
         }
 
-        const airQualityCollection = db.collection('AirQualityData');
-        await airQualityCollection.deleteMany({});
+        // --- Seed AirQualityData from JSON file ---
+        const dataPath = join(process.cwd(), 'data', 'air_quality_2023.json');
+        const raw = await readFile(dataPath, 'utf-8');
+        const records = JSON.parse(raw);
 
-        const apiRes = await axios.get('https://data.cityofnewyork.us/resource/c3uy-2p5r.json?$limit=5000');
+        const docs = records.map(r => ({
+            borough: r.borough,
+            neighborhood: r.neighborhood,
+            year: 2023,
+            pollutants: {
+                PM2_5: Number(r.pm25),
+                NO2: Number(r.no2),
+                Ozone: r.ozone ? Number(r.ozone) : null
+            },
+            pollutionScore: Number(r.pollutionScore),
+            dataSource: r.dataSource,
+            lastUpdated: new Date()
+        }));
 
-        const rows = Array.isArray(apiRes.data) ? apiRes.data : [];
-
-        const airDocs = rows
-            .filter(r => r.name && r.geo_place_name && r.data_value)
-            .map(r => ({
-                pollutant: r.name,
-                neighborhood: r.geo_place_name,
-                value: Number(r.data_value),
-                timePeriod: r.time_period,
-                date: r.start_date
-            }))
-            .filter(r => !isNaN(r.value));
-
-        if (airDocs.length > 0) {
-            await airQualityCollection.insertMany(airDocs);
-            console.log(`Inserted ${airDocs.length} air quality records`);
+        if (docs.length > 0) {
+            await airQualityCollection.insertMany(docs);
+            console.log(`✓ Inserted ${docs.length} AirQualityData records`);
         }
 
         console.log('========================================');

@@ -112,163 +112,125 @@ router.get('/', (req, res) => {
 /* ========================
 PROFILE SETUP
 ========================== */
+// PROFILE ROUTES
 router.get('/profile', async (req, res) => {
-    if (req.session.user.isProfileConfigured === false) {
-        return res.redirect('/profile/setup');
-    }
+    if (req.session.user.isProfileConfigured === false) return res.redirect('/profile/setup');
 
     try {
         const userFromDb = await userData.getUserById(req.session.user._id);
-        return res.render('profileView', {
+        return res.render('profile', {
             title: 'Your Profile',
             user: userFromDb,
             isLoggedIn: true
         });
     } catch (e) {
-        return res.status(500).render('error', {
-            title: 'Error Loading Profile',
-            error: e.toString(),
-            isLoggedIn: true
-        });
+        console.error(e);
+        return res.status(500).render('error', { title: 'Error Loading Profile', error: e.toString(), isLoggedIn: true });
     }
 });
 
 router.post('/profile', async (req, res) => {
-    const {city, state, age, profileDescription} = req.body;
+    let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
-    if (req.session.user.isProfileConfigured === false) {
-        return res.status(403).redirect('/profile/setup'); 
-    }
-    
     try {
-        const sanitizedCity = xss(city);
-        const sanitizedState = xss(state);
-        const parsedAge = age; 
+        borough = xss(borough).trim();
+        neighborhood = xss(neighborhood).trim();
+        profileDescription = xss(profileDescription).trim();
+        age = parseInt(age);
 
-        validation.checkString(sanitizedCity, 'City');
-        validation.checkString(sanitizedState, 'State');
-        validation.checkAge(parsedAge, 'Age'); 
-        validation.checkString(profileDescription, 'Profile Description', true); 
+        if (!borough) throw 'Borough is required';
+        if (!neighborhood) throw 'Neighborhood is required';
+        validation.checkAge(age, 'Age');
 
     } catch (e) {
         errors.push(e);
     }
-    
+
     if (errors.length > 0) {
-        return res.status(400).render('profileView', {
+        return res.status(400).render('profile', {
             title: 'Your Profile',
-            errors: errors,
+            errors,
             hasErrors: true,
-            user: {...req.session.user, city, state, age, profileDescription},
+            user: { ...req.session.user, borough, neighborhood, age, profileDescription },
             isLoggedIn: true
         });
     }
 
-    try {
-        const updatedUser = await userData.updateUserProfile(
-            req.session.user._id, 
-            xss(city), 
-            xss(state), 
-            parseInt(age), 
-            xss(profileDescription)
-        );
-        
-        req.session.user = {
-            _id: updatedUser._id.toString(), 
-            firstName: updatedUser.firstName, 
-            lastName: updatedUser.lastName, 
-            username: updatedUser.username, 
-            profileDescription: updatedUser.profileDescription,
-            city: updatedUser.city,
-            state: updatedUser.state,
-            age: updatedUser.age,
-            isProfileConfigured: updatedUser.isProfileConfigured
-        };
-        
-        return res.redirect('/profile?success=true');
-        
-    } catch (e) {
-        errors.push(e.toString());
-        return res.status(500).render('profileView', {
-            title: 'Your Profile',
-            errors: errors,
-            hasErrors: true,
-            user: {...req.session.user, city, state, age, profileDescription},
-            isLoggedIn: true
-        });
-    }
+    const updatedUser = await userData.updateUserProfile(
+        req.session.user._id,
+        borough,
+        neighborhood,
+        age,
+        profileDescription
+    );
+
+    req.session.user = { ...updatedUser };
+    return res.redirect('/profile?success=true');
 });
 
+
+
 router.get('/profile/setup', async (req, res) => {
+    const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     return res.render('profileSetup', {
         title: 'Complete Profile Setup',
         user: req.session.user,
-        isLoggedIn: true
+        isLoggedIn: true,
+        boroughs
     });
 });
 
-router.post('/profile/setup', async (req, res) => {
-    const {city, state, age, profileDescription} = req.body;
-    let errors = [];
-    
-    try {
-        const sanitizedCity = xss(city);
-        const sanitizedState = xss(state);
-        const parsedAge = age; 
 
-        validation.checkString(sanitizedCity, 'City');
-        validation.checkString(sanitizedState, 'State');
-        validation.checkAge(parsedAge, 'Age'); 
-        validation.checkString(profileDescription, 'Profile Description', true); 
+router.post('/profile/setup', async (req, res) => {
+    let { borough, neighborhood, age, profileDescription } = req.body;
+    let errors = [];
+
+    try {
+        borough = xss(borough).trim();
+        neighborhood = xss(neighborhood).trim();
+        profileDescription = xss(profileDescription).trim();
+        age = parseInt(age);
+
+        if (!borough) throw 'Borough is required';
+        if (!neighborhood) throw 'Neighborhood is required';
+        validation.checkAge(age, 'Age');
 
     } catch (e) {
         errors.push(e);
     }
-    
+
     if (errors.length > 0) {
         return res.status(400).render('profileSetup', {
             title: 'Complete Profile Setup',
-            errors: errors,
+            errors,
             hasErrors: true,
-            user: {city, state, age, profileDescription},
+            user: { borough, neighborhood, age, profileDescription },
             isLoggedIn: true
         });
     }
 
-    try {
-        const updatedUser = await userData.updateUserProfile(
-            req.session.user._id, 
-            xss(city), 
-            xss(state), 
-            parseInt(age), 
-            xss(profileDescription)
-        );
-        
-        req.session.user = {
-            _id: updatedUser._id.toString(), 
-            firstName: updatedUser.firstName, 
-            lastName: updatedUser.lastName, 
-            username: updatedUser.username, 
-            profileDescription: updatedUser.profileDescription,
-            city: updatedUser.city,
-            state: updatedUser.state,
-            age: updatedUser.age,
-            isProfileConfigured: updatedUser.isProfileConfigured
-        };
+    const updatedUser = await userData.updateUserProfile(
+        req.session.user._id,
+        borough,
+        neighborhood,
+        age,
+        profileDescription
+    );
 
-        return res.redirect('/home');
-        
-    } catch (e) {
-        errors.push(e.toString());
-        return res.status(500).render('profileSetup', {
-            title: 'Complete Profile Setup',
-            errors: errors,
-            hasErrors: true,
-            user: {city, state, age, profileDescription},
-            isLoggedIn: true
-        });
-    }
+    req.session.user = {
+        _id: updatedUser._id.toString(),
+        username: updatedUser.username,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        borough: updatedUser.borough,
+        neighborhood: updatedUser.neighborhood,
+        age: updatedUser.age,
+        profileDescription: updatedUser.profileDescription,
+        isProfileConfigured: updatedUser.isProfileConfigured
+    };
+
+    return res.redirect('/home');
 });
 
 export default router;

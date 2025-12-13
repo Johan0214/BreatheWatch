@@ -26,7 +26,10 @@ app.engine(
       lt: (a, b) => a < b,
       add: (a, b) => a + b,
       subtract: (a, b) => a - b,
-      toString: (value) => (value ? value.toString() : '')
+      toString: (value) => (value ? value.toString() : ''),
+      ifEquals: function(arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+      }
     }
   })
 );
@@ -85,6 +88,8 @@ app.use('/dashboard', (await import('./routes/dashboard.js')).default);
 app.use('/reports', (await import('./routes/reports.js')).default);
 app.use('/airQuality', airQualityRoutes);
 app.use('/pollution-sources', pollutionRoutes);
+app.use('/profile', (await import('./routes/profile.js')).default);
+
 
 /* ===========================
    GLOBAL ERROR HANDLER
