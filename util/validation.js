@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 /**
  * Checks if a value is a non-empty string and trims it.
  * @param {string} val - The value to check.
@@ -80,11 +81,28 @@ export const checkAge = (age, varName) => {
     return parsedAge;
 };
 
+/**
+ * Checks if a value is a valid MongoDB ObjectId.
+ * @param {string} id The ID to check.
+ * @param {string} varName The name of the variable being checked.
+ * @returns {string} The validated and trimmed ID.
+ * @throws {Error} If the ID is invalid.
+ */
+export const checkId = (id, varName) => {
+    if (!id) throw `Error: ${varName} must be provided.`;
+    if (typeof id !== 'string') throw `Error: ${varName} must be a string.`;
+    id = id.trim();
+    if (id.length === 0) throw `Error: ${varName} cannot be an empty string.`;
+    if (!ObjectId.isValid(id)) throw `Error: ${varName} is not a valid MongoDB ObjectId.`;
+    return id;
+};
+
 const exportedMethods = {
     checkString,
     checkUsername,
     checkPassword,
-    checkAge
+    checkAge,
+    checkId
 };
 
 export default exportedMethods;

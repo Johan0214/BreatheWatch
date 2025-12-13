@@ -61,7 +61,7 @@ export const getUserById = async (id) => {
     return user;
 };
 
-export const updateUserProfile = async (userId, city, state, age, description) => {
+export const updateUserProfile = async (userId, city, state, age, description, isProfileConfigured = true) => {
     userId = validation.checkId(userId, 'User ID');
     
     city = validation.checkString(city, 'City', false); 
@@ -73,7 +73,7 @@ export const updateUserProfile = async (userId, city, state, age, description) =
         throw 'Profile description must be 500 characters or less.';
     }
     
-    const usersCollection = await userCollectionFn();
+    const usersCollection = await usersCollectionFn();
     const updateInfo = await usersCollection.updateOne(
         { _id: new ObjectId(userId) },
         { 
@@ -95,4 +95,4 @@ export const updateUserProfile = async (userId, city, state, age, description) =
     return await getUserById(userId);
 };
 
-export default { createUser, checkUser, getUserById };
+export default { createUser, checkUser, getUserById, updateUserProfile };
