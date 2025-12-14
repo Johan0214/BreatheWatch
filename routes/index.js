@@ -1,20 +1,15 @@
 import { Router } from 'express';
 import * as reportsData from '../data/reports.js';
 import * as usersData from '../data/users.js';
+import airQualityData from '../data/AirQualityData.js';
+import { protectRoute } from '../helpers/validation.js';
+import xss from 'xss';
 
 const router = Router();
 
-const protectRoute = (req, res, next) => {
-    if (!req.session.user) {
-        req.session.previousUrl = req.originalUrl;
-        return res.redirect('/login'); // Redirect to login if not authenticated
-    }
-    next();
-};
-
 // GET – dashboard
 router.get('/', protectRoute, async (req, res) => {
-    const isLoggedIn = req.session.user ? true : false;
+    const isLoggedIn = !!req.session.user;
     const userId = req.session.user._id;
 
     let currentRisk = 'Data Unavailable';
@@ -23,9 +18,31 @@ router.get('/', protectRoute, async (req, res) => {
         const user = await usersData.getUserById(userId); 
         const reports = await reportsData.getReportsByUser(userId);
 
+        const sanitizedUser = {
+          ...user,
+          username: xss(user.username),
+          firstName: xss(user.firstName),
+          lastName: xss(user.lastName),
+          borough: user.borough ? xss(user.borough) : '', 
+          neighborhood: user.neighborhood ? xss(user.neighborhood) : '',
+          profileDescription: user.profileDescription ? xss(user.profileDescription) : '',
+        };
+
+        const neighborhood = user.neighborhood?.trim().toLowerCase();
+        const borough = user.borough?.trim().toLowerCase();
+        
+        if (neighborhood && borough) {
+          const airQuality = await airQualityData.getByNeighborhoodYear(
+          borough,
+          neighborhood,
+          2023);
+
+          if (airQuality) currentRisk = xss(airQuality.pollutionScore);
+        }
+
         res.render('dashboard', {
             title: 'Your Dashboard',
-            user: user,
+            user: sanitizedUser,
             reports: reports,
             currentRisk: currentRisk,
             isLoggedIn: true 
