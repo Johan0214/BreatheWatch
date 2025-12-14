@@ -15,7 +15,7 @@ router.get('/', validation.protectRoute, async (req, res) => {
     });
 });
 
-router.post('/', protectRoute, async (req, res) => {
+router.post('/', validation.protectRoute, async (req, res) => {
     const n1 = xss(req.body['neighborhood1']); 
     const n2 = xss(req.body['neighborhood2']);
 
