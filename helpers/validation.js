@@ -141,3 +141,12 @@ export const validateSeverity = (severity) => {
     }
     return severity;
 };
+
+// Middleware to protect routes
+export const protectRoute = (req, res, next) => {
+  if (!req.session.user) {
+    req.session.previousUrl = req.originalUrl;
+    return res.redirect('/login');
+  }
+  next();
+};
