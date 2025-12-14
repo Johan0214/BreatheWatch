@@ -1,4 +1,10 @@
 <div class="dashboard-container">
+
+     {{#if query.success}}
+        <div class="message-box success" style="margin-bottom: 20px; padding: 10px; background-color: #d4edda; color: #155724; border-radius: 6px;">
+            Profile updated successfully!
+        </div>
+    {{/if}}
     <h1>Welcome to Your BreatheWatch Dashboard, {{user.firstName}}!</h1>
     <p class="subtitle">Quick access to your profile and health reports.</p>
 

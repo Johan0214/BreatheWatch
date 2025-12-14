@@ -4,7 +4,15 @@ import { getHistoricalData } from '../data/airQuality.js';
 
 const router = Router();
 
-router.get('/score', async (req, res) => {
+const protectRoute = (req, res, next) => {
+  if (!req.session.user) {
+    req.session.previousUrl = req.originalUrl;
+    return res.redirect('/login');
+  }
+  next();
+};
+
+router.get('/score', protectRoute, async (req, res) => {
     const neighborhood = req.query.neighborhood;
 
     if (!neighborhood) {
@@ -29,7 +37,7 @@ router.get('/score', async (req, res) => {
     }
 });
 
-router.get('/trends', async (req, res) => {
+router.get('/trends', protectRoute, async (req, res) => {
     const neighborhood = req.query.neighborhood;
 
     if (!neighborhood) {

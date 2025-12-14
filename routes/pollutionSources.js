@@ -6,7 +6,16 @@ const router = Router();
 import * as pollutionSourcesData from '../data/pollutionSources.js';
 
 // GET /pollution-sources - View all pollution sources with filters
-router.get('/', async (req, res) => {
+
+const protectRoute = (req, res, next) => {
+  if (!req.session.user) {
+    req.session.previousUrl = req.originalUrl;
+    return res.redirect('/login');
+  }
+  next();
+};
+
+router.get('/', protectRoute, async (req, res) => {
     try {
         const filters = {
             sourceType: req.query.sourceType,
@@ -31,7 +40,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /pollution-sources/neighborhood - View sources for specific neighborhood
-router.get('/neighborhood', async (req, res) => {
+router.get('/neighborhood', protectRoute, async (req, res) => {
     try {
         const { neighborhood, borough } = req.query;
         
@@ -63,7 +72,7 @@ router.get('/neighborhood', async (req, res) => {
 });
 
 // GET /pollution-sources/borough/:borough - Top sources by borough
-router.get('/borough/:borough', async (req, res) => {
+router.get('/borough/:borough', protectRoute, async (req, res) => {
     try {
         const borough = req.params.borough;
         const limit = parseInt(req.query.limit) || 10;
@@ -88,7 +97,7 @@ router.get('/borough/:borough', async (req, res) => {
 });
 
 // GET /pollution-sources/type/:type - Sources by type
-router.get('/type/:type', async (req, res) => {
+router.get('/type/:type', protectRoute, async (req, res) => {
     try {
         const sourceType = req.params.type;
 
@@ -109,7 +118,7 @@ router.get('/type/:type', async (req, res) => {
 });
 
 // GET /pollution-sources/:id - View specific pollution source
-router.get('/:id', async (req, res) => {
+router.get('/:id', protectRoute, async (req, res) => {
     try {
         const source = await pollutionSourcesData.getPollutionSourceById(req.params.id);
 
