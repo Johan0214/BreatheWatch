@@ -160,9 +160,10 @@ router.post('/profile', validation.protectRoute, async (req, res) => {
     );
 
     req.session.user = { ...updatedUser };
-    return res.redirect('/profile?success=true');
-});
 
+    // Existing profile update -> redirect to /dashboard with success query
+    return res.redirect('/dashboard?success=true');
+});
 
 
 router.get('/profile/setup', validation.protectRoute, async (req, res) => {
@@ -224,6 +225,7 @@ router.post('/profile/setup', validation.protectRoute, async (req, res) => {
         isProfileConfigured: updatedUser.isProfileConfigured
     };
 
+    // First-time setup -> redirect to /home
     return res.redirect('/home');
 });
 
