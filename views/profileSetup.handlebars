@@ -97,16 +97,32 @@
             </select>
         </div>
 
-        <div class="form-group">
+        {{!-- <div class="form-group">
             <label for="neighborhood">Neighborhood</label>
-            <input 
+           <input 
                 type="text" 
                 id="neighborhood" 
                 name="neighborhood" 
                 value="{{user.neighborhood}}" 
                 placeholder="Example: Williamsburg"
-                required
-            >
+                required >
+        </div> --}}
+        <div class="form-group">
+            <label for="neighborhood">Neighborhood</label>
+            <select id="neighborhood" name="neighborhood" required>
+                <option value="">Select your neighborhood</option>
+                
+                {{#if user.neighborhood}}
+                    <option value="{{user.neighborhood}}" selected>{{user.neighborhood}}</option>
+                {{/if}}
+
+                {{#each neighborhoodData}}
+                    {{#if (eq ../user.neighborhood this)}}
+                    {{else}}
+                        <option value="{{this}}">{{this}}</option>
+                    {{/if}}
+                {{/each}}
+            </select>
         </div>
 
         <div class="form-group">

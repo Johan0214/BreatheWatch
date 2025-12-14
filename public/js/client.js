@@ -65,4 +65,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signupForm) {
         signupForm.addEventListener('submit', e => { if (!validateSignupForm()) e.preventDefault(); });
     }
+
+    //Profile dropdown test
+    const boroughSelect = document.getElementById('borough');
+    const neighborhoodSelect = document.getElementById('neighborhood');
+
+    if (boroughSelect && neighborhoodSelect) {
+        boroughSelect.addEventListener('change', async function() {
+            const selectedBorough = this.value;
+            
+            // Clear current list
+            neighborhoodSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            if (!selectedBorough) {
+                neighborhoodSelect.innerHTML = '<option value="">Select your neighborhood</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/neighborhoods?borough=${selectedBorough}`);
+                const neighborhoods = await response.json();
+
+                neighborhoodSelect.innerHTML = '<option value="">Select your neighborhood</option>';
+                
+                neighborhoods.forEach(n => {
+                    const option = document.createElement('option');
+                    option.value = n;
+                    option.textContent = n;
+                    neighborhoodSelect.appendChild(option);
+                });
+            } catch (e) {
+                console.error("Error fetching neighborhoods:", e);
+                neighborhoodSelect.innerHTML = '<option value="">Error loading list</option>';
+            }
+        });
+    }
 });
