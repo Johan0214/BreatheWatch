@@ -6,16 +6,9 @@ const router = Router();
 import * as pollutionSourcesData from '../data/pollutionSources.js';
 import xss from 'xss';
 import { checkString } from '../util/validation.js';
+import { protectRoute } from '../helpers/validation.js';
 
 // GET /pollution-sources - View all pollution sources with filters
-
-const protectRoute = (req, res, next) => {
-  if (!req.session.user) {
-    req.session.previousUrl = req.originalUrl;
-    return res.redirect('/login');
-  }
-  next();
-};
 
 router.get('/', protectRoute, async (req, res) => {
     try {

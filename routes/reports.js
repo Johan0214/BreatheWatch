@@ -8,17 +8,11 @@ import * as reportsData from '../data/reports.js';
 import { readFile } from "fs/promises";
 import path from "path";
 import airQualityData from "../data/AirQualityData.js"
+import { protectRoute } from '../helpers/validation.js';
 
 const router = Router();
 
-// Middleware to protect authenticated routes
-const protectRoute = (req, res, next) => {
-    if (!req.session.user) {
-        req.session.previousUrl = req.originalUrl;
-        return res.redirect('/login'); // Redirect to login if not authenticated
-    }
-    next();
-};
+
 
 // GET /reports - View all reports (optional: public)
 // GET /reports - landing page + all reports
