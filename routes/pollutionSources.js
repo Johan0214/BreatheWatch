@@ -6,9 +6,11 @@ const router = Router();
 import * as pollutionSourcesData from '../data/pollutionSources.js';
 import xss from 'xss';
 import { checkString } from '../util/validation.js';
+import { protectRoute } from '../helpers/validation.js';
 
 // GET /pollution-sources - View all pollution sources with filters
-router.get('/', async (req, res) => {
+
+router.get('/', protectRoute, async (req, res) => {
     try {
         const filters = {
             sourceType: req.query.sourceType ? xss(req.query.sourceType) : undefined,
@@ -33,8 +35,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /pollution-sources/neighborhood - View sources for specific neighborhood
-router.get('/neighborhood', async (req, res) => {
-    let neighborhood, borough;
+router.get('/neighborhood', protectRoute, async (req, res) => {
     try {
         neighborhood = validation.checkString(req.query.neighborhood, 'Neighborhood');
         borough = validation.checkString(req.query.borough, 'Borough');
