@@ -1,5 +1,6 @@
 import { airQualityData } from "../config/mongoCollections.js";
 import validation from "../util/validation.js";
+import { lookupNeighborhoodAndBorough } from '../util/validation.js';
 
 const normalizeName = (val, varName) => {
   const s = validation.checkString(val, varName);
@@ -97,7 +98,49 @@ export const getByNeighborhoodYear = async (borough, neighborhood, year = 2023) 
   return doc;
 };
 
+export const compareNeighborhoods = async (neighborhoodNames) => {
+    if (!Array.isArray(neighborhoodNames) || neighborhoodNames.length === 0) {
+        throw new Error("Neighborhood names array must be provided.");
+    }
 
+    const comparisonPromises = neighborhoodNames.map(async (rawName) => {
+        try {
+            const { neighborhood, borough } = await lookupNeighborhoodAndBorough(rawName);
+
+            const airData = await getByNeighborhoodYear(borough, neighborhood, 2023);
+ 
+            if (!airData) {
+                throw new Error(`Air quality data not available for ${neighborhood}, ${borough}.`);
+            }
+
+            const pmValue = Number(airData.pollutants.PM2_5);
+            const no2Value = Number(airData.pollutants.NO2);
+
+            const riskData = computePollutionScore(pmValue, no2Value);
+            
+            return {
+                success: true,
+                inputName: rawName,
+                neighborhood: neighborhood,
+                borough: borough,
+                pm25Value: pmValue.toFixed(2), 
+                no2Value: no2Value.toFixed(2), 
+                riskPm25: riskData.pm25,
+                riskNo2: riskData.no2,
+                overallRisk: riskData.overall 
+            };
+        } catch (e) {
+            console.error(`Error processing neighborhood "${rawName}": ${e.message}`);
+            return {
+                success: false,
+                inputName: rawName,
+                error: e.message || e.toString()
+            };
+        }
+    });
+
+    return Promise.all(comparisonPromises);
+};
 
 
 export const getAllForMap2023 = async () => {
@@ -126,6 +169,7 @@ const exportedMethods = {
   upsertAirQualityRecord,
   getByNeighborhoodYear,
   getAllForMap2023,
+  compareNeighborhoods
 };
 
 export default exportedMethods;
