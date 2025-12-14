@@ -46,6 +46,7 @@ router.get('/', protectRoute, async (req, res) => {
       reports,
       currentRisk,
       isLoggedIn,
+      query: req.query  // pass query for success message
     });
   } catch (e) {
     console.error('Error loading dashboard data for user ID:', userId, e);
