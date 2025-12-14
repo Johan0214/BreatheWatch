@@ -1,5 +1,4 @@
 // tasks/seed.js 
-// SEED SCRIPT FOR MULTIPLE USERS AND REPORTS (FIXED VERSION)
 
 import { MongoClient, ObjectId } from 'mongodb';
 import { readFile } from 'fs/promises';
