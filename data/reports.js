@@ -1,5 +1,4 @@
 // data/reports.js
-// FIXED VERSION - Uses ObjectId for all IDs
 
 import { reports as reportsCollection } from '../config/mongoCollections.js';
 import { users as usersCollection } from '../config/mongoCollections.js';

@@ -1,5 +1,4 @@
 // data/pollutionSources.js
-// Pollution Source Breakdown Data Functions - KOEN'S FEATURE 6
 // Shows users where pollution comes from (factories, traffic, construction)
 
 import { pollutionSources as pollutionSourcesCollection } from '../config/mongoCollections.js';
