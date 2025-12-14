@@ -125,9 +125,7 @@ export const compareNeighborhoods = async (neighborhoodNames) => {
                 borough: borough,
                 pm25Value: pmValue.toFixed(2), 
                 no2Value: no2Value.toFixed(2), 
-                riskPm25: riskData.pm25,
-                riskNo2: riskData.no2,
-                overallRisk: riskData.overall 
+                overallRisk: riskData 
             };
         } catch (e) {
             console.error(`Error processing neighborhood "${rawName}": ${e.message}`);
