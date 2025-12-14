@@ -1,23 +1,20 @@
 // routes/reports.js
-
-
 import { Router } from 'express';
 import * as reportsData from '../data/reports.js';
 import { readFile } from "fs/promises";
 import path from "path";
 import airQualityData from "../data/AirQualityData.js"
 import validation from '../helpers/validation.js';
+import xss from 'xss';
 
 const router = Router();
-
-
 
 // GET /reports - landing page + all reports
 router.get('/', validation.protectRoute, async (req, res) => {
     try {
         if (!req.session.user) return res.redirect('/login');
 
-        const page = parseInt(req.query.page) || 1;
+        const page = parseInt(xss(req.query.page) || 1);
         const reportsResult = await reportsData.getAllReports(page, 20);
 
         res.render('reports/index', {
@@ -57,7 +54,8 @@ router.get('/my', validation.protectRoute, async (req, res) => {
 
 // GET /reports/create - Show create report form (protected)
 router.get('/create', validation.protectRoute, (req, res) => {
-    const { neighborhood, borough } = req.query;
+    const neighborhood = xss(req.query.neighborhood || '');
+    const borough = xss(req.query.borough || '');
     res.render('reports/create', {
         title: 'Submit Report - BreatheWatch',
         neighborhood: neighborhood || '',
@@ -68,7 +66,12 @@ router.get('/create', validation.protectRoute, (req, res) => {
 // POST /reports/create - AJAX endpoint to create report (protected)
 router.post('/create', validation.protectRoute, async (req, res) => {
     try {
-        const { neighborhood, borough, description, reportType, severity } = req.body;
+        
+        const neighborhood = xss(req.body.neighborhood);
+        const borough = xss(req.body.borough);
+        const description = xss(req.body.description);
+        const reportType = xss(req.body.reportType);
+        const severity = xss(req.body.severity);
 
         const newReport = await reportsData.createReport(
             req.session.user._id,
@@ -162,7 +165,8 @@ router.get("/airquality/map-data", validation.protectRoute, async (req, res) => 
 // GET /reports/:id - View specific report (optional: public)
 router.get('/:id', validation.protectRoute, async (req, res) => {
     try {
-        const report = await reportsData.getReportById(req.params.id);
+        const reportId = xss(req.params.id);
+        const report = await reportsData.getReportById(reportId);
 
         res.render('reports/view', {
             title: 'Report Details - BreatheWatch',
@@ -179,14 +183,15 @@ router.get('/:id', validation.protectRoute, async (req, res) => {
 // POST /reports/:id/status - Update report status (AJAX, protected)
 router.post('/:id/status', validation.protectRoute, async (req, res) => {
     try {
-        const { status } = req.body;
+        const status = xss(req.body.status);
+        const reportId = xss(req.params.id);
         
         if (!status) {
             return res.status(400).json({ error: 'Status is required' });
         }
 
         const updatedReport = await reportsData.updateReportStatus(
-            req.params.id,
+            reportId,
             status
         );
 

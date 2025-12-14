@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { userData } from '../data/index.js';
 import xss from 'xss';
-import validation from '../helpers/validation.js';
+import validation, { protectRoute } from '../helpers/validation.js';
 
 const router = Router();
 
@@ -11,11 +11,6 @@ const redirectIfAuthenticated = (req, res, next) => {
   next();
 };
 
-// Protect routes requiring login
-const protectRoute = (req, res, next) => {
-  if (!req.session.user) return res.redirect('/');
-  next();
-};
 
 //   LOGIN
 router.get('/login', redirectIfAuthenticated, (req, res) =>
@@ -106,7 +101,7 @@ router.get('/', (req, res) => {
 // PROFILE SETUP
 
 // PROFILE ROUTES
-router.get('/profile', async (req, res) => {
+router.get('/profile', validation.protectRoute, async (req, res) => {
     if (req.session.user.isProfileConfigured === false) return res.redirect('/profile/setup');
 
     try {
@@ -122,7 +117,7 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-router.post('/profile', async (req, res) => {
+router.post('/profile', validation.protectRoute, async (req, res) => {
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
@@ -165,7 +160,7 @@ router.post('/profile', async (req, res) => {
 });
 
 
-router.get('/profile/setup', async (req, res) => {
+router.get('/profile/setup', validation.protectRoute, async (req, res) => {
     const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     return res.render('profileSetup', {
         title: 'Complete Profile Setup',
@@ -176,7 +171,7 @@ router.get('/profile/setup', async (req, res) => {
 });
 
 
-router.post('/profile/setup', async (req, res) => {
+router.post('/profile/setup', validation.protectRoute, async (req, res) => {
     const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
