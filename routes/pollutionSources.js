@@ -42,8 +42,6 @@ router.get('/', protectRoute, async (req, res) => {
 });
 
 // GET /pollution-sources/neighborhood - View sources for specific neighborhood
-router.get('/neighborhood', async (req, res) => {
-    let neighborhood, borough;
 router.get('/neighborhood', protectRoute, async (req, res) => {
     try {
         neighborhood = validation.checkString(req.query.neighborhood, 'Neighborhood');
