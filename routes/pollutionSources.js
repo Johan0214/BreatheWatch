@@ -1,5 +1,4 @@
 // routes/pollutionSources.js
-// Pollution Source Routes - KOEN'S FEATURE 6
 
 import { Router } from 'express';
 const router = Router();

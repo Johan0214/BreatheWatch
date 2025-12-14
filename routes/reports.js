@@ -1,7 +1,5 @@
 // routes/reports.js
-// User Report Routes - KOEN'S FEATURES (5-6)
-// Feature 5: User-Submitted Reports
-// Feature 6: Report Management & Status Tracking
+
 
 import { Router } from 'express';
 import * as reportsData from '../data/reports.js';
@@ -12,7 +10,8 @@ import validation from '../helpers/validation.js';
 
 const router = Router();
 
-// GET /reports - View all reports (optional: public)
+
+
 // GET /reports - landing page + all reports
 router.get('/', validation.protectRoute, async (req, res) => {
     try {
