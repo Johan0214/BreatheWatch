@@ -8,7 +8,7 @@ import * as reportsData from '../data/reports.js';
 import { readFile } from "fs/promises";
 import path from "path";
 import airQualityData from "../data/AirQualityData.js"
-import validation from '../helpers.validation.js';
+import validation from '../helpers/validation.js';
 
 const router = Router();
 
