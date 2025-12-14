@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { userData } from '../data/index.js';
 import xss from 'xss';
-import validation from '../util/validation.js';
 import { getAllNeighborhoods } from '../data/airQuality.js';
 import validation, { protectRoute } from '../helpers/validation.js';
 
