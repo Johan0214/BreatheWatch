@@ -297,15 +297,6 @@ export const protectRoute = (req, res, next) => {
   next();
 };
 
-export const titleCase = (str) => {
-    if (!str) return str;
-    // Split the string by spaces, capitalize the first letter of each word, and rejoin.
-    return str.toLowerCase().split(' ').map(word => {
-        if (word.length === 0) return '';
-        return word.charAt(0).toUpperCase() + word.slice(1);
-    }).join(' ');
-};
-
 const exportedMethods = {
     checkString,
     checkUsername,
@@ -321,8 +312,7 @@ const exportedMethods = {
     validateSeverity,
     validateYear,
     lookupNeighborhoodAndBorough,
-    protectRoute,
-    titleCase
+    protectRoute
 };
 
 export default exportedMethods;

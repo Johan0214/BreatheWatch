@@ -1,38 +1,25 @@
 import { Router } from 'express';
-import { getByNeighborhoodYear } from '../data/AirQualityData.js';
+import { getNeighborhoodScore } from '../data/airQuality.js';
 import { getHistoricalData } from '../data/airQuality.js';
-import { computePollutionScore } from '../data/AirQualityData.js';
-import validation from '../helpers/validation.js';
 
 const router = Router();
 
-router.get('/score', validation.protectRoute, async (req, res) => {
-    let neighborhoodInput = req.query.neighborhood;
+router.get('/score', async (req, res) => {
+    const neighborhood = req.query.neighborhood;
 
-    if (!neighborhoodInput) {
+    if (!neighborhood) {
         return res.render('qualityscore', { title: "Air Quality Score" });
     }
 
     try {
-        neighborhoodInput = validation.titleCase(neighborhoodInput);
-
-        const { neighborhood, borough } = validation.lookupNeighborhoodAndBorough(neighborhoodInput);
-        const data = await getByNeighborhoodYear(borough, neighborhood, 2023);
-
-        if (!data) {
-            throw new Error(`Air quality data not available for ${neighborhood}, ${borough}.`);
-        }
-
-        const pmValue = Number(data.pollutants.PM2_5);
-        const no2Value = Number(data.pollutants.NO2);
-        const riskData = computePollutionScore(pmValue, no2Value);
+        const data = await getNeighborhoodScore(neighborhood);
 
         return res.render('qualityscore', {
             title: "Air Quality Score",
             neighborhood: data.neighborhood,
-            pm25: pmValue.toFixed(2),
-            no2: no2Value.toFixed(2),
-            overallRisk: riskData
+            pm25: data.pm25,
+            no2: data.no2,
+            score: data.score
         });
     } catch (e) {
         return res.status(400).render('qualityscore', {
@@ -42,7 +29,7 @@ router.get('/score', validation.protectRoute, async (req, res) => {
     }
 });
 
-router.get('/trends', validation.protectRoute, async (req, res) => {
+router.get('/trends', async (req, res) => {
     const neighborhood = req.query.neighborhood;
 
     if (!neighborhood) {
