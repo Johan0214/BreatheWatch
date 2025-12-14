@@ -11,12 +11,6 @@ const redirectIfAuthenticated = (req, res, next) => {
   next();
 };
 
-// Protect routes requiring login
-const protectRoute = (req, res, next) => {
-  if (!req.session.user) return res.redirect('/');
-  next();
-};
-
 /* ===========================
    LOGIN
 =========================== */
@@ -96,7 +90,7 @@ router.post('/signup', async (req, res) => {
 /* ===========================
    LOGOUT
 =========================== */
-router.get('/logout', (req, res) => {
+router.get('/logout', validation.protectRoute,(req, res) => {
   req.session.destroy();
   res.clearCookie('BreatheWatchSession');
   res.render('logout', { title: 'Logged Out' });
@@ -113,7 +107,7 @@ router.get('/', (req, res) => {
 PROFILE SETUP
 ========================== */
 // PROFILE ROUTES
-router.get('/profile', async (req, res) => {
+router.get('/profile', validation.protectRoute,async (req, res) => {
     if (req.session.user.isProfileConfigured === false) return res.redirect('/profile/setup');
 
     try {
@@ -129,7 +123,7 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-router.post('/profile', async (req, res) => {
+router.post('/profile', validation.protectRoute, async (req, res) => {
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
@@ -171,7 +165,7 @@ router.post('/profile', async (req, res) => {
 
 
 
-router.get('/profile/setup', async (req, res) => {
+router.get('/profile/setup', validation.protectRoute, async (req, res) => {
     const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     return res.render('profileSetup', {
         title: 'Complete Profile Setup',
@@ -182,7 +176,7 @@ router.get('/profile/setup', async (req, res) => {
 });
 
 
-router.post('/profile/setup', async (req, res) => {
+router.post('/profile/setup', validation.protectRoute, async (req, res) => {
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
