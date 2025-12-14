@@ -4,13 +4,13 @@ export function getPollutionScore(pm25, no2) {
     }
 
     let pmScore;
-    if (pm25 <= 12) pmScore = "Safe";
-    else if (pm25 <= 35.4) pmScore = "Moderate";
+    if (pm25 < 8) pmScore = "Safe";
+    else if (pm25 >= 8 && pm25 <= 35.4) pmScore = "Moderate";
     else pmScore = "High-Risk";
 
     let no2Score;
-    if (no2 <= 53) no2Score = "Safe";
-    else if (no2 <= 100) no2Score = "Moderate";
+    if (no2 <= 18) no2Score = "Safe";
+    else if (no2 > 18 && no2 <= 53) no2Score = "Moderate";
     else no2Score = "High-Risk";
 
     //Final Score is the worse of the two

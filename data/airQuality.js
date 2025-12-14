@@ -6,51 +6,48 @@ export const getNeighborhoodScore = async (neighborhood) => {
     neighborhood = validation.validateLocation(neighborhood, "Neighborhood");
 
     const airCol = await airCollectionFn();
-    
-    // Fetching PM2.5 and NO2 data for the neighborhood
-    const pmRow = await airCol.findOne({
-        pollutant: "Fine particles (PM 2.5)",
-        neighborhood: neighborhood
-    });
 
-    const no2Row = await airCol.findOne({
-        pollutant: "Nitrogen dioxide (NO2)",
-        neighborhood: neighborhood
-    });
+    // Fetch the single document for the neighborhood
+    const doc = await airCol.findOne({ neighborhood: neighborhood.toLowerCase(), year: 2023 });
 
-    if (!pmRow || !no2Row) {
-        throw `Missing PM2.5 or NO2 data for ${neighborhood}.`;
+    if (!doc) {
+        throw `No data found for ${neighborhood}.`;
     }
 
-    const pmValue = Number(pmRow.value);
-    const no2Value = Number(no2Row.value);
+    const pmValue = doc.pollutants?.PM2_5;
+    const no2Value = doc.pollutants?.NO2;
 
-    if (isNaN(pmValue) || isNaN(no2Value)) {
-        throw "Pollutant values must be numeric.";
+    if (pmValue == null || no2Value == null) {
+        throw `Missing PM2.5 or NO2 data for ${neighborhood}.`;
     }
 
     // Calculating pollution score
     const score = getPollutionScore(pmValue, no2Value);
 
     return {
-        neighborhood: neighborhood,
+        neighborhood: doc.neighborhood,
         pm25: pmValue,
         no2: no2Value,
         score: score
     };
 };
+
 export const getHistoricalData = async (neighborhood) => {
     neighborhood = validation.validateLocation(neighborhood, "Neighborhood");
 
     const collection = await airCollectionFn();
 
     const records = await collection
-        .find({ neighborhood })
-        .project({ pollutant: 1, value: 1, date: 1, timePeriod: 1 })
-        .sort({ date: 1 })
+        .find({ neighborhood: neighborhood.toLowerCase() })
+        .project({ year: 1, pollutants: 1 })
+        .sort({ year: 1 })
         .toArray();
 
-    return records;
+    // Return plain JSON
+    return records.map(r => ({
+        year: r.year,
+        pollutants: r.pollutants
+    }));
 };
 
 export const getAllNeighborhoods = async(borough) =>{

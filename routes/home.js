@@ -1,8 +1,9 @@
 import { Router } from 'express';
 const router = Router();
+import validation from '../helpers/validation.js';
 
 // GET /home – dashboard
-router.get('/', (req, res) => {
+router.get('/', validation.protectRoute, (req, res) => {
   const isLoggedIn = req.session.user ? true : false;
   res.render('index', {
     title: 'Welcome to BreatheWatch',

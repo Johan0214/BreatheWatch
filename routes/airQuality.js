@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { getNeighborhoodScore } from '../data/airQuality.js';
 import { getHistoricalData } from '../data/airQuality.js';
+import { protectRoute } from '../helpers/validation.js';
+import xss from 'xss';
 
 const router = Router();
 
-router.get('/score', async (req, res) => {
-    const neighborhood = req.query.neighborhood;
+
+router.get('/score', protectRoute, async (req, res) => {
+    const neighborhood = xss(req.query.neighborhood);
 
     if (!neighborhood) {
         return res.render('qualityscore', { title: "Air Quality Score" });
@@ -29,8 +32,8 @@ router.get('/score', async (req, res) => {
     }
 });
 
-router.get('/trends', async (req, res) => {
-    const neighborhood = req.query.neighborhood;
+router.get('/trends', protectRoute, async (req, res) => {
+    const neighborhood = xss(req.query.neighborhood);
 
     if (!neighborhood) {
         return res.status(400).render('trends', {

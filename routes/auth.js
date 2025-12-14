@@ -3,6 +3,7 @@ import { userData } from '../data/index.js';
 import xss from 'xss';
 import validation from '../util/validation.js';
 import { getAllNeighborhoods } from '../data/airQuality.js';
+import validation, { protectRoute } from '../helpers/validation.js';
 
 const router = Router();
 
@@ -12,15 +13,8 @@ const redirectIfAuthenticated = (req, res, next) => {
   next();
 };
 
-// Protect routes requiring login
-const protectRoute = (req, res, next) => {
-  if (!req.session.user) return res.redirect('/');
-  next();
-};
 
-/* ===========================
-   LOGIN
-=========================== */
+//   LOGIN
 router.get('/login', redirectIfAuthenticated, (req, res) =>
   res.render('login', { title: 'Login', user: {} })
 );
@@ -53,9 +47,7 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
   }
 });
 
-/* ===========================
-   SIGNUP
-=========================== */
+//   SIGNUP
 router.get('/signup', (req, res) =>
   res.render('signup', { title: 'Sign Up', user: {} })
 );
@@ -94,9 +86,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-/* ===========================
-   LOGOUT
-=========================== */
+//   LOGOUT
 router.get('/logout', (req, res) => {
   req.session.destroy();
   res.clearCookie('BreatheWatchSession');
@@ -110,11 +100,10 @@ router.get('/', (req, res) => {
   return res.redirect('/login'); // not logged in
 });
 
-/* ========================
-PROFILE SETUP
-========================== */
+// PROFILE SETUP
+
 // PROFILE ROUTES
-router.get('/profile', async (req, res) => {
+router.get('/profile', validation.protectRoute, async (req, res) => {
     if (req.session.user.isProfileConfigured === false) return res.redirect('/profile/setup');
 
     try {
@@ -134,7 +123,7 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-router.post('/profile', async (req, res) => {
+router.post('/profile', validation.protectRoute, async (req, res) => {
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
@@ -171,12 +160,13 @@ router.post('/profile', async (req, res) => {
     );
 
     req.session.user = { ...updatedUser };
-    return res.redirect('/profile?success=true');
+
+    // Existing profile update -> redirect to /dashboard with success query
+    return res.redirect('/dashboard?success=true');
 });
 
 
-
-router.get('/profile/setup', async (req, res) => {
+router.get('/profile/setup', validation.protectRoute, async (req, res) => {
     const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     try {
       const userBorough = req.session.user.borough;
@@ -199,55 +189,65 @@ router.get('/profile/setup', async (req, res) => {
 });
 
 
-router.post('/profile/setup', async (req, res) => {
+router.post('/profile/setup', validation.protectRoute, async (req, res) => {
+    const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
     let { borough, neighborhood, age, profileDescription } = req.body;
     let errors = [];
 
     try {
-        borough = xss(borough).trim();
-        neighborhood = xss(neighborhood).trim();
-        profileDescription = xss(profileDescription).trim();
+        borough = xss(borough)?.trim();
+        neighborhood = xss(neighborhood)?.trim();
+        profileDescription = xss(profileDescription)?.trim();
         age = parseInt(age);
 
         if (!borough) throw 'Borough is required';
         if (!neighborhood) throw 'Neighborhood is required';
         validation.checkAge(age, 'Age');
 
+        if (profileDescription && profileDescription.length > 500) {
+            throw 'Profile description must be 500 characters or less.';
+        }
+
+        const updatedUser = await userData.updateUserProfile(
+            req.session.user._id,
+            borough,
+            neighborhood,
+            age,
+            profileDescription
+        );
+
+        req.session.user = {
+            _id: updatedUser._id.toString(),
+            username: updatedUser.username,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            borough: updatedUser.borough,
+            neighborhood: updatedUser.neighborhood,
+            age: updatedUser.age,
+            profileDescription: updatedUser.profileDescription,
+            isProfileConfigured: updatedUser.isProfileConfigured
+        };
+
+        // First-time setup → redirect to /home
+        return res.redirect('/home');
+
     } catch (e) {
         errors.push(e);
-    }
 
-    if (errors.length > 0) {
         return res.status(400).render('profileSetup', {
             title: 'Complete Profile Setup',
             errors,
             hasErrors: true,
-            user: { borough, neighborhood, age, profileDescription },
-            isLoggedIn: true
+            user: {
+                borough,
+                neighborhood,
+                age,
+                profileDescription
+            },
+            isLoggedIn: true,
+            boroughs
         });
     }
-
-    const updatedUser = await userData.updateUserProfile(
-        req.session.user._id,
-        borough,
-        neighborhood,
-        age,
-        profileDescription
-    );
-
-    req.session.user = {
-        _id: updatedUser._id.toString(),
-        username: updatedUser.username,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        borough: updatedUser.borough,
-        neighborhood: updatedUser.neighborhood,
-        age: updatedUser.age,
-        profileDescription: updatedUser.profileDescription,
-        isProfileConfigured: updatedUser.isProfileConfigured
-    };
-
-    return res.redirect('/home');
 });
 
 router.get('/api/neighborhoods', async (req, res) => {

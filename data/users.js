@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import xss from 'xss';
 import { users as usersCollectionFn } from '../config/mongoCollections.js';
-import validation from '../util/validation.js';
+import validation from '../helpers/validation.js';
 
 const saltRounds = 12;
 

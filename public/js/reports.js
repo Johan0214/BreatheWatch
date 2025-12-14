@@ -1,5 +1,4 @@
 // public/js/reports.js
-// Client-side JavaScript for Reports - FIXED VERSION (No Duplicates)
 
 // XSS Protection - Sanitize user input on client side
 function sanitizeHTML(str) {

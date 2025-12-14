@@ -1,5 +1,4 @@
 // tasks/seedPollutionSources.js
-// Seed pollution sources data - KOEN'S FEATURE 6
 
 import { MongoClient, ObjectId } from 'mongodb';
 
