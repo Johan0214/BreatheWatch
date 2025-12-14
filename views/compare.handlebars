@@ -1,0 +1,208 @@
+<style>
+    /* Specific styles for the comparison page */
+    .compare-section {
+        margin-top: 2rem;
+        padding: 20px;
+        background-color: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-light);
+    }
+    
+    .compare-form {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        margin-bottom: 2rem;
+    }
+    
+    .compare-form .form-group {
+        flex-grow: 1;
+        margin-bottom: 0;
+    }
+
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 2rem;
+    }
+    
+    .neighborhood-card {
+        background-color: #f9f9f9;
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-light);
+        border-top: 5px solid var(--primary-color);
+        transition: transform 0.3s;
+    }
+    
+    .neighborhood-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .neighborhood-card h3 {
+        color: var(--primary-dark);
+        margin-bottom: 0.25rem;
+        font-size: 1.75rem;
+    }
+    .neighborhood-card .borough-name {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 1.5rem;
+        display: block;
+        font-style: italic;
+    }
+
+    .risk-data p {
+        margin-bottom: 0.75rem;
+        font-size: 1.05rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed #eee;
+        padding-bottom: 5px;
+    }
+
+    .risk-indicator {
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 5px;
+        color: white;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        min-width: 100px; /* Ensures visual consistency */
+        text-align: center;
+    }
+
+    /* Risk Color Coding */
+    .risk-indicator.Safe {
+        background-color: #4CAF50; /* Green */
+    }
+    .risk-indicator.Moderate {
+        background-color: #FFC107; /* Amber/Yellow */
+        color: var(--text-color); /* Change text for contrast */
+    }
+    .risk-indicator.High-Risk {
+        background-color: #F44336; /* Red */
+    }
+
+    .failed-searches {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-top: 1.5rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .compare-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="compare-section">
+    <h2>{{title}}</h2>
+    <p>Enter the names of two neighborhoods in NYC to compare their air quality risks.</p>
+    
+    <!-- Error Message Display -->
+    {{#if hasErrors}}
+        <div class="error-message">
+            <ul>
+                {{#each errors}}
+                    <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/if}}
+
+    <!-- Comparison Input Form -->
+    <form method="POST" action="/compare" class="compare-form">
+        <div class="form-group">
+            <label for="neighborhood1">Neighborhood 1 Name</label>
+            <input 
+                type="text" 
+                id="neighborhood1" 
+                name="neighborhood1" 
+                value="{{n1Input}}" 
+                placeholder="e.g., Chelsea"
+                required
+            >
+        </div>
+        
+        <div class="form-group">
+            <label for="neighborhood2">Neighborhood 2 Name</label>
+            <input 
+                type="text" 
+                id="neighborhood2" 
+                name="neighborhood2" 
+                value="{{n2Input}}" 
+                placeholder="e.g., Bushwick"
+                required
+            >
+        </div>
+        
+        <button type="submit" class="button secondary">Compare</button>
+    </form>
+
+    <!-- Comparison Results Display -->
+    {{#if showResults}}
+        <h3>Comparison Results for {{results.0.neighborhood}} vs. {{results.1.neighborhood}} (2023)</h3>
+        
+        <div class="comparison-grid">
+            {{#each results}}
+                <div class="neighborhood-card">
+                    <h3>{{neighborhood}}</h3>
+                    <span class="borough-name">Borough: {{borough}}</span>
+
+                    <div class="risk-data">
+                        <!-- Overall Risk -->
+                        <p>
+                            <span>Overall Risk:</span>
+                            <span class="risk-indicator {{overallRisk}}">{{overallRisk}}</span>
+                        </p>
+                        
+                        <!-- PM2.5 Data -->
+                        <p>
+                            <span>PM2.5 (µg/m³): </span>
+                            <span>{{pm25Value}}</span>
+                        </p>
+                        <p>
+                            <span>PM2.5 Risk:</span>
+                            <span class="risk-indicator {{riskPm25}}">{{riskPm25}}</span>
+                        </p>
+                        
+                        <!-- NO2 Data -->
+                        <p>
+                            <span>NO₂ (ppb): </span>
+                            <span>{{no2Value}}</span>
+                        </p>
+                        <p>
+                            <span>NO₂ Risk:</span>
+                            <span class="risk-indicator {{riskNo2}}">{{riskNo2}}</span>
+                        </p>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    {{/if}}
+
+    <!-- Display Failed Queries -->
+    {{#if failedSearches}}
+        <div class="failed-searches">
+            <h4>Errors during search:</h4>
+            <ul>
+                {{#each failedSearches}}
+                    <li>
+                        Could not process "{{inputName}}": {{error}}
+                    </li>
+                {{/each}}
+            </ul>
+            <p>Please check the spelling of the neighborhood name.</p>
+        </div>
+    {{/if}}
+</div>

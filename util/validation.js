@@ -1,4 +1,8 @@
 import { ObjectId } from 'mongodb';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 /**
  * Checks if a value is a non-empty string and trims it.
  * @param {string} val - The value to check.
@@ -106,6 +110,81 @@ export const checkId = (id, varName) => {
     return id;
 };
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const GEOJSON_FILE_PATH = path.join(__dirname, '..', 'data', 'neighborhoods.geojson');
+
+let GEOJSON_FEATURES = [];
+try {
+    const rawData = fs.readFileSync(GEOJSON_FILE_PATH, 'utf8');
+    const geojson = JSON.parse(rawData);
+    if (geojson && Array.isArray(geojson.features)) {
+        GEOJSON_FEATURES = geojson.features;
+        console.log(`Successfully loaded ${GEOJSON_FEATURES.length} GeoJSON features from ${GEOJSON_FILE_PATH}`);
+    } else {
+        console.error('Error: GeoJSON file loaded but does not contain a valid "features" array.');
+    }
+} catch (error) {
+    console.error(`ERROR: Could not load neighborhoods.geojson file from ${GEOJSON_FILE_PATH}.`, error.message);
+}
+
+
+let neighborhoodLookupCache = null;
+
+const getNeighborhoodMap = () => {
+    if (neighborhoodLookupCache) {
+        return neighborhoodLookupCache;
+    }
+
+    const map = {};
+    for (const feature of GEOJSON_FEATURES) {
+        const properties = feature.properties;
+        
+        const name = properties?.ntaname;
+        const borough = properties?.boroname;
+
+        if (!name || !borough) {
+            console.warn('Skipping GeoJSON feature due to missing ntaname or boroname property:', properties);
+            continue;
+        }
+        
+        const key = name.toLowerCase().trim();
+
+        map[key] = {
+            neighborhood: name, 
+            borough: borough
+        };
+    }
+
+    neighborhoodLookupCache = map;
+    return map;
+};
+
+
+/**
+ * Simplifies the location lookup by validating a user-provided neighborhood name 
+ * against a known list and returning the corresponding standardized name and borough.
+ * @param {string} rawNeighborhoodName The neighborhood name provided by the user.
+ * @returns {object} { neighborhood: string, borough: string }
+ */
+export const lookupNeighborhoodAndBorough = async (rawNeighborhoodName) => {
+    const neighborhoodMap = getNeighborhoodMap();
+    
+    let neighborhood = checkString(rawNeighborhoodName, "Neighborhood Name");
+    
+    const normalizedName = neighborhood.toLowerCase().trim();
+
+    const locationData = neighborhoodMap[normalizedName];
+
+    if (!locationData) {
+        throw new Error(`The neighborhood "${neighborhood}" is not recognized or supported by BreatheWatch. Please ensure you are entering a valid NYC neighborhood name.`);
+    }
+    return { 
+        neighborhood: locationData.neighborhood, 
+        borough: locationData.borough 
+    };
+};
 const exportedMethods = {
     checkString,
     checkUsername,
@@ -113,7 +192,8 @@ const exportedMethods = {
     checkNumber,
     checkPassword,
     checkAge,
-    checkId
+    checkId,
+    lookupNeighborhoodAndBorough
 };
 
 export default exportedMethods;
