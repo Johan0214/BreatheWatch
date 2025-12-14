@@ -1,6 +1,5 @@
 import { airQualityData } from "../config/mongoCollections.js";
-import validation from "../util/validation.js";
-import { lookupNeighborhoodAndBorough } from '../util/validation.js';
+import validation from "../helpers/validation.js";
 
 const normalizeName = (val, varName) => {
   const s = validation.checkString(val, varName);
@@ -105,7 +104,7 @@ export const compareNeighborhoods = async (neighborhoodNames) => {
 
     const comparisonPromises = neighborhoodNames.map(async (rawName) => {
         try {
-            const { neighborhood, borough } = await lookupNeighborhoodAndBorough(rawName);
+            const { neighborhood, borough } = await validation.lookupNeighborhoodAndBorough(rawName);
 
             const airData = await getByNeighborhoodYear(borough, neighborhood, 2023);
  

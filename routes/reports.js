@@ -8,15 +8,13 @@ import * as reportsData from '../data/reports.js';
 import { readFile } from "fs/promises";
 import path from "path";
 import airQualityData from "../data/AirQualityData.js"
-import { protectRoute } from '../helpers/validation.js';
+import validation from '../helpers/validation.js';
 
 const router = Router();
 
-
-
 // GET /reports - View all reports (optional: public)
 // GET /reports - landing page + all reports
-router.get('/', async (req, res) => {
+router.get('/', validation.protectRoute, async (req, res) => {
     try {
         if (!req.session.user) return res.redirect('/login');
 
@@ -41,7 +39,7 @@ router.get('/', async (req, res) => {
 
 
 // GET /reports/my - View user's reports (protected)
-router.get('/my', protectRoute, async (req, res) => {
+router.get('/my', validation.protectRoute, async (req, res) => {
     try {
         const userId = req.session.user._id;
         const reportsList = await reportsData.getReportsByUser(userId);
@@ -59,7 +57,7 @@ router.get('/my', protectRoute, async (req, res) => {
 });
 
 // GET /reports/create - Show create report form (protected)
-router.get('/create', protectRoute, (req, res) => {
+router.get('/create', validation.protectRoute, (req, res) => {
     const { neighborhood, borough } = req.query;
     res.render('reports/create', {
         title: 'Submit Report - BreatheWatch',
@@ -69,7 +67,7 @@ router.get('/create', protectRoute, (req, res) => {
 });
 
 // POST /reports/create - AJAX endpoint to create report (protected)
-router.post('/create', protectRoute, async (req, res) => {
+router.post('/create', validation.protectRoute, async (req, res) => {
     try {
         const { neighborhood, borough, description, reportType, severity } = req.body;
 
@@ -92,7 +90,7 @@ router.post('/create', protectRoute, async (req, res) => {
     }
 });
 
-router.get("/pollution-map", (req, res) => {
+router.get("/pollution-map", validation.protectRoute, (req, res) => {
   try {
     res.render("reports/map", {
       title: "Air Quality Map",
@@ -108,7 +106,7 @@ router.get("/pollution-map", (req, res) => {
 });
 
 // GET /reports/neighborhoods-geojson
-router.get("/neighborhoods-geojson", async (req, res) => {
+router.get("/neighborhoods-geojson", validation.protectRoute, async (req, res) => {
   try {
     const filePath = path.join(process.cwd(), "data", "neighborhoods.geojson");
     const geoData = await readFile(filePath, "utf-8");
@@ -119,7 +117,7 @@ router.get("/neighborhoods-geojson", async (req, res) => {
   }
 });
 
-router.get("/airquality/map-data", async (req, res) => {
+router.get("/airquality/map-data", validation.protectRoute, async (req, res) => {
   try {
     const geoPath = path.join(process.cwd(), "data", "neighborhoods.geojson");
     const geoRaw = await readFile(geoPath, "utf-8");
@@ -163,7 +161,7 @@ router.get("/airquality/map-data", async (req, res) => {
 
 
 // GET /reports/:id - View specific report (optional: public)
-router.get('/:id', async (req, res) => {
+router.get('/:id', validation.protectRoute, async (req, res) => {
     try {
         const report = await reportsData.getReportById(req.params.id);
 
@@ -180,7 +178,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /reports/:id/status - Update report status (AJAX, protected)
-router.post('/:id/status', protectRoute, async (req, res) => {
+router.post('/:id/status', validation.protectRoute, async (req, res) => {
     try {
         const { status } = req.body;
         

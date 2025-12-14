@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import * as airQualityData from '../data/AirQualityData.js';
 import xss from 'xss';
-import { checkString } from '../util/validation.js';
-import { protectRoute } from '../helpers/validation.js';
+import validation from '../helpers/validation.js';
 
 const router = Router();
 
-router.get('/', protectRoute, async (req, res) => {
+
+router.get('/', validation.protectRoute, async (req, res) => {
     res.render('compare', {
         title: 'Compare Neighborhoods',
         isLoggedIn: true,
@@ -15,7 +15,7 @@ router.get('/', protectRoute, async (req, res) => {
     });
 });
 
-router.post('/', protectRoute, async (req, res) => {
+router.post('/', validation.protectRoute, async (req, res) => {
     const n1 = xss(req.body['neighborhood1']); 
     const n2 = xss(req.body['neighborhood2']);
 
@@ -23,13 +23,13 @@ router.post('/', protectRoute, async (req, res) => {
     let neighborhoodNames = [];
 
     try {
-        neighborhoodNames.push(checkString(n1, 'Neighborhood 1'));
+        neighborhoodNames.push(validation.checkString(n1, 'Neighborhood 1'));
     } catch (e) {
         errors.push(e.message || 'Neighborhood 1 is required.');
     }
     
     try {
-        neighborhoodNames.push(checkString(n2, 'Neighborhood 2'));
+        neighborhoodNames.push(validation.checkString(n2, 'Neighborhood 2'));
     } catch (e) {
         errors.push(e.message || 'Neighborhood 2 is required.');
     }

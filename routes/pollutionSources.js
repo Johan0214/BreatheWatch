@@ -5,12 +5,10 @@ import { Router } from 'express';
 const router = Router();
 import * as pollutionSourcesData from '../data/pollutionSources.js';
 import xss from 'xss';
-import { checkString } from '../util/validation.js';
-import { protectRoute } from '../helpers/validation.js';
+import validation from '../helpers/validation.js';
 
 // GET /pollution-sources - View all pollution sources with filters
-
-router.get('/', protectRoute, async (req, res) => {
+router.get('/', validation.protectRoute, async (req, res) => {
     try {
         const filters = {
             sourceType: req.query.sourceType ? xss(req.query.sourceType) : undefined,
@@ -35,7 +33,8 @@ router.get('/', protectRoute, async (req, res) => {
 });
 
 // GET /pollution-sources/neighborhood - View sources for specific neighborhood
-router.get('/neighborhood', protectRoute, async (req, res) => {
+router.get('/neighborhood', validation.protectRoute, async (req, res) => {
+    let neighborhood, borough;
     try {
         neighborhood = validation.checkString(req.query.neighborhood, 'Neighborhood');
         borough = validation.checkString(req.query.borough, 'Borough');
@@ -71,7 +70,7 @@ router.get('/neighborhood', protectRoute, async (req, res) => {
 });
 
 // GET /pollution-sources/borough/:borough - Top sources by borough
-router.get('/borough/:borough', async (req, res) => {
+router.get('/borough/:borough', validation.protectRoute, async (req, res) => {
     let borough;
     try {
         borough = validation.checkString(req.params.borough, 'Borough');
@@ -106,7 +105,7 @@ router.get('/borough/:borough', async (req, res) => {
 });
 
 // GET /pollution-sources/type/:type - Sources by type
-router.get('/type/:type', async (req, res) => {
+router.get('/type/:type', validation.protectRoute, async (req, res) => {
     let sourceType;
     try {
         sourceType = validation.checkString(req.params.type, 'Source Type');
@@ -129,7 +128,7 @@ router.get('/type/:type', async (req, res) => {
 });
 
 // GET /pollution-sources/:id - View specific pollution source
-router.get('/:id', async (req, res) => {
+router.get('/:id', validation.protectRoute, async (req, res) => {
     let id;
     try {
         id = validation.checkId(req.params.id, 'Pollution Source ID');
