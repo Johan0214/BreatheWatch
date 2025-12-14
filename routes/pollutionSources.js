@@ -5,7 +5,7 @@ import { Router } from 'express';
 const router = Router();
 import * as pollutionSourcesData from '../data/pollutionSources.js';
 import xss from 'xss';
-import { checkString } from '../util/validation.js';
+import validation from '../helpers/validation.js';
 
 // GET /pollution-sources - View all pollution sources with filters
 router.get('/', async (req, res) => {
