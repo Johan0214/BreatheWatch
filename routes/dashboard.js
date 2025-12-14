@@ -2,20 +2,10 @@ import { Router } from 'express';
 import * as reportsData from '../data/reports.js';
 import * as usersData from '../data/users.js';
 import airQualityData from '../data/AirQualityData.js';
+import xss from 'xss';
+import { protectRoute } from '../helpers/validation.js';
 
 const router = Router();
-
-// Middleware to protect routes
-const protectRoute = (req, res, next) => {
-  if (!req.session.user) {
-    req.session.previousUrl = req.originalUrl;
-    return res.redirect('/login');
-  }
-  next();
-};
-
-// Utility to normalize strings
-const normalizeString = (str) => (str ? str.trim() : '');
 
 // GET – dashboard
 router.get('/', protectRoute, async (req, res) => {
@@ -28,6 +18,16 @@ router.get('/', protectRoute, async (req, res) => {
     const user = await usersData.getUserById(userId);
     const reports = await reportsData.getReportsByUser(userId);
 
+    const sanitizedUser = {
+        ...user,
+        username: xss(user.username),
+        firstName: xss(user.firstName),
+        lastName: xss(user.lastName),
+        borough: xss(user.borough),
+        neighborhood: xss(user.neighborhood),
+        profileDescription: xss(user.profileDescription),
+    };
+
     const neighborhood = user.neighborhood?.trim().toLowerCase();
     const borough = user.borough?.trim().toLowerCase();
 
@@ -37,12 +37,12 @@ router.get('/', protectRoute, async (req, res) => {
         neighborhood,
         2023
       );
-      if (airQuality) currentRisk = airQuality.pollutionScore;
+      if (airQuality) currentRisk = xss(airQuality.pollutionScore);
     }
 
     res.render('dashboard', {
       title: 'Your Dashboard',
-      user,
+      user: sanitizedUser,
       reports,
       currentRisk,
       isLoggedIn,
