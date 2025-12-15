@@ -7,17 +7,6 @@
     <p>Report an air quality issue you've observed in your neighborhood.</p>
 
     <form id="reportForm" novalidate>
-        <div class="form-group">
-            <label for="neighborhood">Neighborhood <span aria-label="required">*</span></label>
-            <input 
-                type="text" 
-                id="neighborhood" 
-                name="neighborhood" 
-                required 
-                aria-required="true"
-                value="{{neighborhood}}"
-                placeholder="e.g., Harlem, Williamsburg">
-        </div>
 
         <div class="form-group">
             <label for="borough">Borough <span aria-label="required">*</span></label>
@@ -31,6 +20,22 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label for="neighborhood">Neighborhood <span aria-label="required">*</span></label>
+            <select id="neighborhood" name="neighborhood" required aria-required="true">
+                <option value="">Select Neighborhood</option>
+                {{#if neighborhood}}
+                    <option value="{{neighborhood}}" selected>{{neighborhood}}</option>
+                {{/if}}
+                {{#each neighborhoodData}}
+                    {{#if (eq ../neighborhood this)}}
+                    {{else}}
+                        <option value="{{this}}">{{this}}</option>
+                    {{/if}}
+                {{/each}}
+            </select>
+        </div>
+        
         <div class="form-group">
             <label for="reportType">Type of Issue <span aria-label="required">*</span></label>
             <select id="reportType" name="reportType" required aria-required="true">

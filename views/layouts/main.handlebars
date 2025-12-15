@@ -18,14 +18,17 @@
         <nav>
             <div class="logo">BreatheWatch</div>
             <div class="nav-links">
+                {{#if user}}
+                    {{#if (eq user.isProfileConfigured false)}}
+                    {{else}}
                 <a href="/">Home</a>
-                {{#if isLoggedIn}}
                     <a href="/dashboard">Dashboard</a>
                     <a href="/compare">Search & Compare</a>
                     <a href="/pollution-sources">Pollution Sources</a>
                     <a href="/logout">Logout</a>
+                    {{/if}}
                 {{else}}
-                    <!-- Show login and signup links if not logged in -->
+                    <a href="/">Home</a>
                     <a href="/login" class="button secondary">Login</a>
                     <a href="/signup" class="button primary">Sign Up</a>
                 {{/if}}
