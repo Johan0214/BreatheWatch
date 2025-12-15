@@ -6,6 +6,7 @@ import path from "path";
 import airQualityData from "../data/AirQualityData.js"
 import validation from '../helpers/validation.js';
 import xss from 'xss';
+import { getAllNeighborhoods } from "../data/airQuality.js"
 
 const router = Router();
 
@@ -53,13 +54,22 @@ router.get('/my', validation.protectRoute, async (req, res) => {
 });
 
 // GET /reports/create - Show create report form (protected)
-router.get('/create', validation.protectRoute, (req, res) => {
+router.get('/create', validation.protectRoute, async (req, res) => {
     const neighborhood = xss(req.query.neighborhood || '');
     const borough = xss(req.query.borough || '');
+    let neighborhoodData = [];
+    if (borough) {
+        try {
+            neighborhoodData = await getAllNeighborhoods(borough);
+        } catch (e) {
+            console.error("Error fetching neighborhoods for report form:", e);
+        }
+    }
     res.render('reports/create', {
         title: 'Submit Report - BreatheWatch',
         neighborhood: neighborhood || '',
-        borough: borough || ''
+        borough: borough || '',
+        neighborhoodData
     });
 });
 
