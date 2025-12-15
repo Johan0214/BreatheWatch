@@ -19,12 +19,13 @@
             <div class="logo">BreatheWatch</div>
             <div class="nav-links">
                 {{#if user}}
-                    {{#if user.isProfileConfigured}}
-                        <a href="/">Home</a>
-                        <a href="/dashboard">Dashboard</a>
-                        <a href="/compare">Search & Compare</a>
-                        <a href="/pollution-sources">Pollution Sources</a>
-                        <a href="/logout">Logout</a>
+                    {{#if (eq user.isProfileConfigured false)}}
+                    {{else}}
+                <a href="/">Home</a>
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/compare">Search & Compare</a>
+                    <a href="/pollution-sources">Pollution Sources</a>
+                    <a href="/logout">Logout</a>
                     {{/if}}
                 {{else}}
                     <a href="/">Home</a>
