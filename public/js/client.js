@@ -70,6 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const boroughSelect = document.getElementById('borough');
     const neighborhoodSelect = document.getElementById('neighborhood');
 
+    const usernameInput = document.getElementById("username");
+  if (usernameInput) {
+    usernameInput.addEventListener("keydown", (e) => {
+      if (e.key === " ") {
+        e.preventDefault();
+      }
+    });
+
+    usernameInput.addEventListener("input", (e) => {
+      if (e.target.value.includes(" ")) {
+        e.target.value = e.target.value.replace(/\s/g, "");
+      }
+    });
+  }
+
     if (boroughSelect && neighborhoodSelect) {
         boroughSelect.addEventListener('change', async function() {
             const selectedBorough = this.value;
