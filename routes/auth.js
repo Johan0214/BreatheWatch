@@ -35,9 +35,11 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
     };
     return res.redirect('/home');
   } catch (e) {
+    const genericErrorMessage = 'Invalid username or password.';
+
     return res.status(401).render('login', {
       title: 'Login',
-      error: e,
+      error: genericErrorMessage,
       user: { username: req.body.username }
     });
   }
