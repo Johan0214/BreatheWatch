@@ -24,9 +24,6 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
     username = xss(username);
     password = xss(password);
 
-    username = validation.checkUsername(username);
-    password = validation.checkPassword(password);
-
     const user = await userData.checkUser(username, password);
 
     req.session.user = {
@@ -38,9 +35,11 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
     };
     return res.redirect('/home');
   } catch (e) {
+    const genericErrorMessage = 'Invalid username or password.';
+
     return res.status(401).render('login', {
       title: 'Login',
-      error: e,
+      error: genericErrorMessage,
       user: { username: req.body.username }
     });
   }
