@@ -18,6 +18,18 @@ export const checkString = (val, varName) => {
     return val;
 };
 
+export const checkName = (name) => {
+    name = checkString(name, 'Name');
+    if (name.length > 20) {
+        throw new Error('Name cannot be longer than 20 characters.');
+    }
+    const nameRegex = /^[a-zA-Z '-]+$/;
+    if(!nameRegex.test(name)){
+        throw new Error('Names cannot contain numbers or special characters.');
+    }
+    return name;
+};
+
 /**
  * Checks username format: must be 4+ characters, no spaces.
  * @param {string} username - The username to check.
@@ -299,6 +311,7 @@ export const protectRoute = (req, res, next) => {
 
 const exportedMethods = {
     checkString,
+    checkName,
     checkUsername,
     checkPassword,
     checkNumber,
