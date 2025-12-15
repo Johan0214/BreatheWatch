@@ -44,8 +44,6 @@ export const createUser = async (firstName, lastName, username, password) => {
 };
 
 export const checkUser = async (username, password) => {
-    username = validation.checkUsername(username, 'Username');
-    password = validation.checkPassword(password);
 
     const usersCollection = await usersCollectionFn();
     const user = await usersCollection.findOne({ username: username.toLowerCase() });
