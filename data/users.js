@@ -14,6 +14,8 @@ export const createUser = async (firstName, lastName, username, password) => {
 
     validation.checkString(firstName, 'First Name');
     validation.checkString(lastName, 'Last Name');
+    validation.checkName(firstName, 'First Name');
+    validation.checkName(lastName, 'Last Name');
     validation.checkUsername(username, 'Username');
     validation.checkPassword(password);
 
