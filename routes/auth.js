@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { userData } from '../data/index.js';
 import xss from 'xss';
+import { getAllNeighborhoods } from '../data/airQuality.js';
 import validation, { protectRoute } from '../helpers/validation.js';
 
 const router = Router();
@@ -106,10 +107,14 @@ router.get('/profile', validation.protectRoute, async (req, res) => {
 
     try {
         const userFromDb = await userData.getUserById(req.session.user._id);
+        // console.log("borough___1", userFromDb.borough);
+        const neighborhoodData = await getAllNeighborhoods(userFromDb.borough);
+        // console.log("neighborhoods__1", neighborhoodData);
         return res.render('profile', {
             title: 'Your Profile',
             user: userFromDb,
-            isLoggedIn: true
+            isLoggedIn: true,
+            neighborhoodData
         });
     } catch (e) {
         console.error(e);
@@ -162,12 +167,24 @@ router.post('/profile', validation.protectRoute, async (req, res) => {
 
 router.get('/profile/setup', validation.protectRoute, async (req, res) => {
     const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
-    return res.render('profileSetup', {
+    try {
+      const userBorough = req.session.user.borough;
+      const neighborhoodData = await getAllNeighborhoods(userBorough);
+
+      return res.render('profileSetup', {
         title: 'Complete Profile Setup',
         user: req.session.user,
         isLoggedIn: true,
-        boroughs
+        boroughs,
+        neighborhoodData
     });
+    } catch (error) {
+      console.error("Profile Setup Error:", error);
+      return res.status(500).render('error', {
+        title: "Error",
+        error: "Could not load profile setup data."
+      })
+    }
 });
 
 
@@ -232,5 +249,14 @@ router.post('/profile/setup', validation.protectRoute, async (req, res) => {
     }
 });
 
+router.get('/api/neighborhoods', async (req, res) => {
+    try {
+        const borough = req.query.borough;
+        const neighborhoods = await getAllNeighborhoods(borough);
+        res.json(neighborhoods);
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
 
 export default router;

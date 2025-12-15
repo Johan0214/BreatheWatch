@@ -10,10 +10,10 @@ The goal of BreatheWatch is to make environmental health information easy to und
 
 ---
 ##  Team Members
-## Koen Santos
-## Rosa Taveras
-## Johan Jaramillo
-## Dhruv Bhardwaj
+-  **Koen Santos**
+-  **Rosa Taveras**
+-  **Johan Jaramillo**
+-  **Dhruv Bhardwaj**
 
 ##  Technologies Used
 

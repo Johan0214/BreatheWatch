@@ -1,4 +1,4 @@
-import { airQualityData as airCollectionFn } from '../config/mongoCollections.js';
+import { airQualityData as airCollectionFn,  pollutionSources as pollutionSourcesFn } from '../config/mongoCollections.js';
 import * as validation from '../helpers/validation.js';
 import { getPollutionScore } from '../helpers/scoring.js';
 
@@ -50,5 +50,15 @@ export const getHistoricalData = async (neighborhood) => {
     }));
 };
 
+export const getAllNeighborhoods = async(borough) =>{
+    const pollutionCol = await pollutionSourcesFn();
+    // console.log("pollutionCol", pollutionCol);
+    let fetchData = {};
+    if (borough) {
+        fetchData.borough = borough;
+    }
 
-export default { getNeighborhoodScore };
+    const neighborhoods = await pollutionCol.distinct('neighborhood', fetchData);
+    return neighborhoods.sort();
+}
+export default { getNeighborhoodScore, getAllNeighborhoods, getHistoricalData };
