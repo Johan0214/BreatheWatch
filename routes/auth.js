@@ -15,7 +15,7 @@ const redirectIfAuthenticated = (req, res, next) => {
 
 //   LOGIN
 router.get('/login', redirectIfAuthenticated, (req, res) =>
-  res.render('login', { title: 'Login', user: {} })
+  res.render('login', { title: 'Login' })
 );
 
 router.post('/login', redirectIfAuthenticated, async (req, res) => {
@@ -29,12 +29,12 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
 
     const user = await userData.checkUser(username, password);
 
-    // After successful login
     req.session.user = {
-        _id: user._id.toString(), // must be string
+        _id: user._id.toString(),
         username: user.username,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
+        isProfileConfigured: user.isProfileConfigured || false
     };
     return res.redirect('/home');
   } catch (e) {
@@ -48,7 +48,7 @@ router.post('/login', redirectIfAuthenticated, async (req, res) => {
 
 //   SIGNUP
 router.get('/signup', (req, res) =>
-  res.render('signup', { title: 'Sign Up', user: {} })
+  res.render('signup', { title: 'Sign Up' })
 );
 
 router.post('/signup', async (req, res) => {
